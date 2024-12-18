@@ -3,6 +3,7 @@ import { signinSchema, signupSchema } from "../types/zod";
 import client from "../utils/prisma";
 import { compare, hash } from "bcrypt";
 import jwt from "jsonwebtoken";
+import auth from "../middleware/auth";
 
 export const userRouter = Router();
 
@@ -88,6 +89,46 @@ userRouter.post("/signin", async (req, res) => {
 		});
 
 		res.json({ msg: "Sign in successful" });
+	} catch (err) {
+		res.status(500).json({ msg: "Internal server error" });
+	}
+});
+
+userRouter.get("/purchases", auth(["User"]), async (req, res) => {
+	try {
+		const id = res.locals.User.id;
+
+		const purchases = await client.purchases.findMany({
+			where: { userId: id },
+		});
+
+		res.json({ purchases: purchases });
+	} catch (err) {
+		res.status(500).json({ msg: "Internal server error" });
+	}
+});
+
+userRouter.post("/purchase/:courseId", auth(["User"]), async (req, res) => {
+	try {
+		const courseId = req.params.courseId;
+		const id = res.locals.User.id;
+
+		console.log(courseId);
+
+		const course = await client.courses.findFirst({ where: { id: courseId } });
+		if (!course) {
+			res.status(400).json({ msg: "Invalid course Id" });
+			return;
+		}
+
+		const purchase = await client.purchases.create({
+			data: {
+				courseId: courseId,
+				userId: id,
+			},
+		});
+
+		res.json({ msg: "Course bought" });
 	} catch (err) {
 		res.status(500).json({ msg: "Internal server error" });
 	}
