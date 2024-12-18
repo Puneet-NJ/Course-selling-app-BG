@@ -8,12 +8,8 @@ export const userRouter = Router();
 
 userRouter.post("/signup", async (req, res) => {
 	try {
-		console.log(req.body);
-
 		const validateInput = signupSchema.safeParse(req.body);
 		if (!validateInput.success) {
-			console.log(validateInput.error);
-
 			res.status(411).json({ msg: "Invalid inputs" });
 			return;
 		}

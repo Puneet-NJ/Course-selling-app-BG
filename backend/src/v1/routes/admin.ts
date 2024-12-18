@@ -20,7 +20,7 @@ adminRouter.post("/signup", async (req, res) => {
 
 		const hashedPassword = await hash(password, 12);
 
-		const alreadyPresent = await client.user.findUnique({
+		const alreadyPresent = await client.course_Creator.findUnique({
 			where: {
 				email,
 			},
@@ -30,7 +30,7 @@ adminRouter.post("/signup", async (req, res) => {
 			return;
 		}
 
-		const user = await client.user.create({
+		const user = await client.course_Creator.create({
 			data: {
 				name,
 				email,
@@ -62,7 +62,7 @@ adminRouter.post("/signin", async (req, res) => {
 		const email = validateInput.data.email;
 		const password = validateInput.data.password;
 
-		const user = await client.user.findFirst({
+		const user = await client.course_Creator.findFirst({
 			where: {
 				email: email,
 			},

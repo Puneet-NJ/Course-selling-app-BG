@@ -36,6 +36,7 @@ model Courses {
   name String
   description String
   price Int
+  imageUrl String
 
   creatorId String
   creator Course_Creator @relation(fields: [creatorId], references: [id])
