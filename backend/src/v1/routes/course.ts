@@ -149,6 +149,8 @@ courseRouter.get("/", async (req, res) => {
 
 		res.json({ courses });
 	} catch (err) {
+		console.log(err);
+
 		res.status(500).json({ msg: "Internal server error" });
 	}
 });

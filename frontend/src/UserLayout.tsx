@@ -38,7 +38,7 @@ const UserLayout = ({ children }: { children: React.ReactNode }) => {
 			</nav>
 
 			<div className="flex flex-1">
-				<aside className="bg-slate-200 w-1/5 px-20 py-[2%] text-sm sticky top-16 h-[calc(100vh-40px)]">
+				<aside className="bg-slate-200 w-1/5 px-20 py-[2%] text-sm sticky top-16 h-[calc(100vh-40px)] shadow-lg">
 					<h4 className="font-semibold text-gray-600">MAIN MENU</h4>
 					<ul className="mt-[30%] space-y-9">
 						{SIDEBAR_OPTIONS.map((option) => {
@@ -58,8 +58,8 @@ const UserLayout = ({ children }: { children: React.ReactNode }) => {
 					</ul>
 				</aside>
 
-				<div className="flex-1 flex flex-col px-[7%] bg-red-200">
-					<div className="flex-grow">{children}</div>
+				<div className="flex-1 flex flex-col px-[7%]">
+					<div className="flex-grow py-10">{children}</div>
 
 					<footer className="bg-slate-200 flex justify-between text-sm p-10 rounded-t-lg shadow-xl">
 						<div className="w-20">

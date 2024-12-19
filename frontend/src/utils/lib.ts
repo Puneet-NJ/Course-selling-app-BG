@@ -14,3 +14,5 @@ export const BLOCKCHAIN_COHORT_URL =
 
 export const COHORT2_URL =
 	"https://appxcontent.kaxa.in/subject/2024-07-05-0.3715048534115637.jpeg";
+
+export const BACKEND_URL = "http://localhost:4000/api/v1";
