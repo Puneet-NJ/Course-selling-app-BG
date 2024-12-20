@@ -10,3 +10,8 @@ export const purchasesAtom = atom<Course[]>({
 	key: "purchasesAtom",
 	default: [],
 });
+
+export const courseAtom = atom<Course>({
+	key: "courseAtom",
+	default: { id: "", name: "", description: "", imageUrl: "", price: 0 },
+});

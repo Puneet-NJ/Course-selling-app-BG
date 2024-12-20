@@ -106,9 +106,17 @@ userRouter.get("/purchases", auth(["User"]), async (req, res) => {
 	try {
 		const id = res.locals.User.id;
 
-		const purchases = await client.purchases.findMany({
+		const allPurchases = await client.purchases.findMany({
 			where: { userId: id },
 		});
+		console.log(allPurchases);
+
+		const courseIds = allPurchases.map((purchased) => purchased.courseId);
+
+		const purchases = await client.courses.findMany({
+			where: { id: { in: courseIds } },
+		});
+		console.log(purchases);
 
 		res.json({ purchases: purchases });
 	} catch (err) {
@@ -120,8 +128,6 @@ userRouter.post("/purchase/:courseId", auth(["User"]), async (req, res) => {
 	try {
 		const courseId = req.params.courseId;
 		const id = res.locals.User.id;
-
-		console.log(courseId);
 
 		const course = await client.courses.findFirst({ where: { id: courseId } });
 		if (!course) {

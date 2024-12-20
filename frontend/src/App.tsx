@@ -3,6 +3,9 @@ import UserHome from "./Pages/UserHome";
 import UserLayout from "./UserLayout";
 import UserCourses from "./Pages/UserCourses";
 import UserPurchases from "./Pages/UserPurchases";
+import Signup from "./Pages/Signup";
+import Signin from "./Pages/Signin";
+import Course from "./Pages/Course";
 
 function App() {
 	return (
@@ -13,6 +16,9 @@ function App() {
 						<Route path="/" element={<UserHome />} />
 						<Route path="/courses" element={<UserCourses />} />
 						<Route path="/purchases" element={<UserPurchases />} />
+						<Route path="/signup" element={<Signup />} />
+						<Route path="/signin" element={<Signin />} />
+						<Route path="/course/:courseId" element={<Course />} />
 					</Routes>
 				</UserLayout>
 			</BrowserRouter>
