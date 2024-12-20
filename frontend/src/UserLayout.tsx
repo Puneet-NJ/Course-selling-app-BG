@@ -9,9 +9,11 @@ import {
 	Twitter,
 	Instagram,
 	Youtube,
+	Login,
 } from "./utils/Icons";
 import { useNavigate } from "react-router-dom";
 import { PLAYSTORE_URL } from "./utils/lib";
+import { useState } from "react";
 
 export const SIDEBAR_OPTIONS = [
 	{ name: "Home", to: "/", icon: <Home /> },
@@ -19,9 +21,26 @@ export const SIDEBAR_OPTIONS = [
 	{ name: "Purchases", to: "/purchases", icon: <Purchases /> },
 	{ name: "Settings", to: "/", icon: <Settings /> },
 	{ name: "Logout", to: "/signin", icon: <Logout /> },
+	{ name: "Login", to: "/signin", icon: <Login /> },
 ];
+
 const UserLayout = ({ children }: { children: React.ReactNode }) => {
 	const navigate = useNavigate();
+	const [isCookiePresent, setIsCookiePresent] = useState(false);
+	let cookies = document.cookie.split(";");
+
+	let isFound = false;
+	for (let i = 0; i < cookies.length; i++) {
+		const cookieName = cookies[i].trim().split("=")[0];
+		const cookie = cookies[i].trim().split("=")[1];
+
+		console.log(cookie, cookieName, cookies.length);
+
+		if (cookieName === "auth") isFound = true;
+	}
+
+	if (isFound) setIsCookiePresent(true);
+	else if (isCookiePresent) setIsCookiePresent(false);
 
 	return (
 		<div className="w-screen min-h-screen flex flex-col">
@@ -31,8 +50,17 @@ const UserLayout = ({ children }: { children: React.ReactNode }) => {
 				</div>
 
 				<div>
-					<div className="w-10">
-						<Profile />
+					<div className="flex items-center gap-6">
+						<div>
+							{!isFound && (
+								<button className="px-5 py-2 bg-slate-300 rounded-lg font-semibold shadow-md hover:bg-slate-500 hover:text-white duration-150">
+									Login
+								</button>
+							)}
+						</div>
+						<div className="w-10">
+							<Profile />
+						</div>
 					</div>
 				</div>
 			</nav>
@@ -42,6 +70,9 @@ const UserLayout = ({ children }: { children: React.ReactNode }) => {
 					<h4 className="font-semibold text-gray-600">MAIN MENU</h4>
 					<ul className="mt-[30%] space-y-9">
 						{SIDEBAR_OPTIONS.map((option) => {
+							if (isFound && option.name === "Login") return;
+							if (!isFound && option.name === "Logout") return;
+
 							return (
 								<li
 									className="flex items-center space-x-3 cursor-pointer"

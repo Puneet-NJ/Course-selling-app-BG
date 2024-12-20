@@ -19,8 +19,6 @@ courseRouter.post("/", auth(["Admin"]), async (req, res) => {
 		const imageUrl = validateInput.data.imageUrl;
 		const creatorId = res.locals.Admin.id;
 
-		console.log(creatorId);
-
 		const creator = await client.course_Creator.findFirst({
 			where: { id: creatorId },
 		});

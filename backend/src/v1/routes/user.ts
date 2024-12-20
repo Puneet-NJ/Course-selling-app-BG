@@ -44,7 +44,12 @@ userRouter.post("/signup", async (req, res) => {
 			process.env.USER_JWT_PASSWORD as string
 		);
 
-		res.cookie("auth", token, { httpOnly: true });
+		res.cookie("auth", token, {
+			httpOnly: true,
+			sameSite: "lax",
+			secure: process.env.NODE_ENV === "production",
+			domain: "localhost",
+		});
 
 		res.json({ msg: "Sign up successful" });
 	} catch (err) {
@@ -86,6 +91,9 @@ userRouter.post("/signin", async (req, res) => {
 
 		res.cookie("auth", token, {
 			httpOnly: true,
+			sameSite: "lax",
+			secure: process.env.NODE_ENV === "production",
+			domain: "localhost",
 		});
 
 		res.json({ msg: "Sign in successful" });
