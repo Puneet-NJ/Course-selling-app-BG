@@ -16,3 +16,13 @@ export const COHORT2_URL =
 	"https://appxcontent.kaxa.in/subject/2024-07-05-0.3715048534115637.jpeg";
 
 export const BACKEND_URL = "http://localhost:4000/api/v1";
+
+export const ABOUT_CONTENT1 = "Welcome to 100xdevs.";
+
+export const ABOUT_CONTENT2 =
+	"This is an initiative by Harkirat Singh to personally mentor folks in the field of Programming.";
+export const ABOUT_CONTENT3 =
+	"Harkirat strongly feels that today you are either a 1x engineer or a 100x engineer and nothing in the middle, and his hope is to take everyone in this community to be a 100x Engineer.";
+
+export const ABOUT_CONTENT4 =
+	"Join him in his first course on Full Stack development with a heavy focus on Open source projects to learn programming practically.";
