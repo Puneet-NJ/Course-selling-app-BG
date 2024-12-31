@@ -32,9 +32,7 @@ const auth = (roles: Roles[]) => {
 					email: tokenVals.email,
 				};
 				return next();
-			} catch (err) {
-				// Continue to the next role
-			}
+			} catch (err) {}
 		}
 
 		res.status(400).json({ msg: "Unauthorized" });

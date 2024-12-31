@@ -15,3 +15,11 @@ export const courseAtom = atom<Course>({
 	key: "courseAtom",
 	default: { id: "", name: "", description: "", imageUrl: "", price: 0 },
 });
+
+export const creatorAtom = atom({
+	key: "creatorAtom",
+	default: {
+		name: "",
+		courses: [],
+	},
+});

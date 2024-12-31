@@ -1,4 +1,4 @@
-import Logo from "./utils/Logo";
+import Logo from "../../utils/Logo";
 import {
 	Profile,
 	Home,
@@ -10,9 +10,9 @@ import {
 	Instagram,
 	Youtube,
 	Login,
-} from "./utils/Icons";
-import { useLocation, useNavigate } from "react-router-dom";
-import { PLAYSTORE_URL } from "./utils/lib";
+} from "../../utils/Icons";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { PLAYSTORE_URL } from "../../utils/lib";
 import { useState } from "react";
 
 export const SIDEBAR_OPTIONS = [
@@ -56,9 +56,9 @@ const UserLayout = ({ children }: { children: React.ReactNode }) => {
 			} flex flex-col`}
 		>
 			<nav className="flex justify-between items-center px-[5%] py-2 shadow-lg sticky top-0 bg-white z-20">
-				<div className="w-12">
+				<Link to={"/"} className="w-12">
 					<Logo />
-				</div>
+				</Link>
 
 				<div>
 					<div className="flex items-center gap-6">

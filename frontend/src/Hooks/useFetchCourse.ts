@@ -10,7 +10,11 @@ const useFetchCourse = ({ courseId }: { courseId: string }) => {
 
 	const mutation = useMutation({
 		mutationFn: () =>
-			axios({ method: "GET", url: `${BACKEND_URL}/course/${courseId}` }),
+			axios({
+				method: "GET",
+				url: `${BACKEND_URL}/course/${courseId}`,
+				withCredentials: true,
+			}),
 		onSuccess: (response) => {
 			setCourseAtom(response.data.course);
 		},

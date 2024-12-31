@@ -46,7 +46,7 @@ const SignupComp = () => {
 
 		if (response.status === 200) {
 			if (userKind === "user") navigate("/");
-			else navigate("/admin/");
+			else navigate("/creator/");
 		}
 	};
 

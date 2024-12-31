@@ -3,6 +3,7 @@ import { signinSchema, signupSchema } from "../types/zod";
 import { compare, hash } from "bcrypt";
 import client from "../utils/prisma";
 import jwt from "jsonwebtoken";
+import auth from "../middleware/auth";
 
 export const adminRouter = Router();
 
@@ -98,5 +99,20 @@ adminRouter.post("/signin", async (req, res) => {
 		res.json({ msg: "Sign in successful" });
 	} catch (err) {
 		res.status(500).json({ msg: "Internal server error" });
+	}
+});
+
+adminRouter.get("/courses", auth(["Admin"]), async (req, res) => {
+	try {
+		const id = res.locals.Admin.id;
+		const name = res.locals.Admin.name;
+
+		const courses = await client.courses.findMany({
+			where: { creatorId: id },
+		});
+
+		res.json({ name, courses });
+	} catch (err) {
+		res.status(500).json({ msg: "Internal Server Error" });
 	}
 });

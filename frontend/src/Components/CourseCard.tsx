@@ -27,9 +27,13 @@ export const CourseCard = ({
 				<div className="space-y-3">
 					<div className="font-semibold">₹{price}</div>
 
-					<button className="w-full py-3 bg-blue-600 text-white rounded-3xl">
-						<Link to={`/course/${id}`}>{buttonText}</Link>
-					</button>
+					<div>
+						<Link to={`/course/${id}`}>
+							<button className="w-full py-3 bg-blue-600 text-white rounded-3xl">
+								{buttonText}
+							</button>
+						</Link>
+					</div>
 				</div>
 			</div>
 		</div>
