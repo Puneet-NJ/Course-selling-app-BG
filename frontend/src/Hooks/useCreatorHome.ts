@@ -24,6 +24,11 @@ const useCreatorHome = () => {
 
 		onSuccess: () => {
 			fetchCourses();
+
+			setName("");
+			setDesc("");
+			setPrice(0);
+			setImageUrl("");
 		},
 	});
 

@@ -7,11 +7,11 @@ export const CourseCardDisplay = ({ courses }: { courses: Course[] }) => {
 			{courses.map((course) => (
 				<CourseCard
 					key={course.id}
-					id={course.id}
 					imageUrl={course.imageUrl}
 					title={course.name}
 					price={course.price}
 					buttonText={"View details"}
+					to={`/course/${course.id}`}
 				/>
 			))}
 		</div>

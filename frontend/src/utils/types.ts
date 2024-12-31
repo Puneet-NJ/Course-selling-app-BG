@@ -5,3 +5,10 @@ export type Course = {
 	imageUrl: string;
 	price: number;
 };
+
+export type UpdateCourse = {
+	description: string;
+	price: number;
+	imageUrl: string;
+	courseId: string;
+};

@@ -66,11 +66,11 @@ const CreatorHomeComp = () => {
 								className="hover:shadow-lg transition-shadow"
 							>
 								<CourseCard
-									buttonText="View Details"
-									id={course.id}
+									buttonText="Edit Course"
 									imageUrl={course.imageUrl}
 									price={course.price}
 									title={course.name}
+									to={`/creator/course/${course.id}`}
 								/>
 							</div>
 						))}

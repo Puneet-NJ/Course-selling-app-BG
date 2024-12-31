@@ -1,19 +1,19 @@
 import { Link } from "react-router-dom";
 
 type Props = {
-	id: string;
 	imageUrl: string;
 	title: string;
 	price: number;
 	buttonText: string;
+	to: string;
 };
 
 export const CourseCard = ({
-	id,
 	imageUrl,
 	title,
 	price,
 	buttonText,
+	to,
 }: Props) => {
 	return (
 		<div className="border w-72 shadow-lg rounded-lg">
@@ -28,7 +28,7 @@ export const CourseCard = ({
 					<div className="font-semibold">₹{price}</div>
 
 					<div>
-						<Link to={`/course/${id}`}>
+						<Link to={to}>
 							<button className="w-full py-3 bg-blue-600 text-white rounded-3xl">
 								{buttonText}
 							</button>
