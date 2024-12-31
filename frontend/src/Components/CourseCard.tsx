@@ -15,6 +15,8 @@ export const CourseCard = ({
 	buttonText,
 	to,
 }: Props) => {
+	console.log(to);
+
 	return (
 		<div className="border w-72 shadow-lg rounded-lg">
 			<div className="h-[160px]">

@@ -6,9 +6,9 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 	const location = useLocation();
 
 	const isCreator =
-		location.pathname.slice(1, 1 + 6) === "creator" ? true : false;
+		location.pathname.slice(1, 1 + 7) === "creator" ? true : false;
 
-	console.log(isCreator);
+	console.log(location);
 
 	return (
 		<>

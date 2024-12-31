@@ -37,9 +37,6 @@ const CreatorHomeComp = () => {
 					<h2 className="text-2xl font-semibold">Your Courses</h2>
 
 					<div className="space-x-5">
-						<span className="text-sm text-gray-500">
-							{courses.length} {courses.length === 1 ? "course" : "courses"}
-						</span>
 						<Link
 							className="font-medium border rounded-3xl py-2 px-4 hover:bg-slate-200 duration-150"
 							to={`/creator/courses`}
@@ -59,7 +56,7 @@ const CreatorHomeComp = () => {
 						</CardContent>
 					</Card>
 				) : (
-					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+					<div className="flex justify-between">
 						{courses.map((course) => (
 							<div
 								key={course.id}

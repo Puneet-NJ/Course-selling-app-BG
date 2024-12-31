@@ -19,7 +19,7 @@ const CreatorCourseComp = () => {
 
 	return (
 		<div>
-			<Card className="mt-8">
+			<Card className="max-w-6xl mx-auto mt-8">
 				<CardHeader className="">
 					<CardTitle className="px-2 text-2xl flex justify-between">
 						<span>Edit This Course</span>{" "}

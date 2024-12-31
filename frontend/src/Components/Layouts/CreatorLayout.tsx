@@ -19,7 +19,7 @@ const CreatorLayout = ({ children }: { children: React.ReactNode }) => {
 				</div>
 			</nav>
 
-			{children}
+			<div className="pt-10">{children}</div>
 		</div>
 	);
 };
