@@ -13,8 +13,10 @@ import {
 } from "../../utils/Icons";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { BACKEND_URL, PLAYSTORE_URL } from "../../utils/lib";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import axios from "axios";
+import { useRecoilState } from "recoil";
+import { userTokenPresentAtom } from "@/utils/atoms";
 
 export const SIDEBAR_OPTIONS = [
 	{ name: "Home", to: "/", icon: <Home /> },
@@ -27,8 +29,9 @@ export const SIDEBAR_OPTIONS = [
 
 const UserLayout = ({ children }: { children: React.ReactNode }) => {
 	const navigate = useNavigate();
-	const [isFound, setIsFound] = useState(false);
+	const [isFound, setIsFound] = useRecoilState(userTokenPresentAtom);
 	const location = useLocation();
+
 	const path = location.pathname;
 
 	const handleLogout = () => {
@@ -36,8 +39,8 @@ const UserLayout = ({ children }: { children: React.ReactNode }) => {
 			method: "POST",
 			url: `${BACKEND_URL}/logout`,
 			withCredentials: true,
-		}).then((response) => {
-			console.log(response);
+		}).then(() => {
+			setIsFound(false);
 		});
 	};
 
@@ -47,13 +50,21 @@ const UserLayout = ({ children }: { children: React.ReactNode }) => {
 			url: `${BACKEND_URL}/isLoggedIn`,
 			withCredentials: true,
 		}).then((response) => {
-			console.log(response.data);
+			console.log(response.data.loggedIn);
 
 			if (response.data.loggedIn && response.data.role === "user") {
 				setIsFound(true);
+			} else {
+				setIsFound(false);
+
+				if (path === "/purchases" || path === "/settings") {
+					navigate("/signin");
+				}
 			}
 		});
 	}, [path]);
+
+	console.log(isFound);
 
 	return (
 		<div
@@ -85,6 +96,11 @@ const UserLayout = ({ children }: { children: React.ReactNode }) => {
 							{SIDEBAR_OPTIONS.map((option) => {
 								if (isFound && option.name === "Login") return;
 								if (!isFound && option.name === "Logout") return;
+
+								if (!isFound) {
+									if (option.name === "Purchases" || option.name === "Settings")
+										return;
+								}
 
 								return (
 									<li

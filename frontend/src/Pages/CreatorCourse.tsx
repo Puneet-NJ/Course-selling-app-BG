@@ -1,9 +1,12 @@
 import CreatorCourseComp from "@/Components/CreatorCourseComp";
+import CreatorRoutes from "@/Components/HOCs/CreatorRoutes";
 
 const CreatorCourse = () => {
 	return (
 		<div>
-			<CreatorCourseComp />
+			<CreatorRoutes>
+				<CreatorCourseComp />
+			</CreatorRoutes>
 		</div>
 	);
 };

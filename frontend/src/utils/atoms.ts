@@ -23,3 +23,8 @@ export const creatorAtom = atom<{ name: string; courses: Course[] }>({
 		courses: [],
 	},
 });
+
+export const userTokenPresentAtom = atom({
+	key: "userTokenPresentAtom",
+	default: false,
+});

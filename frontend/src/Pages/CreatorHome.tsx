@@ -1,9 +1,12 @@
+import CreatorRoutes from "@/Components/HOCs/CreatorRoutes";
 import CreatorHomeComp from "../Components/CreatorHomeComp";
 
 const CreatorHome = () => {
 	return (
 		<div>
-			<CreatorHomeComp />
+			<CreatorRoutes>
+				<CreatorHomeComp />
+			</CreatorRoutes>
 		</div>
 	);
 };
