@@ -12,8 +12,9 @@ import {
 	Login,
 } from "../../utils/Icons";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { PLAYSTORE_URL } from "../../utils/lib";
-import { useState } from "react";
+import { BACKEND_URL, PLAYSTORE_URL } from "../../utils/lib";
+import { useEffect, useState } from "react";
+import axios from "axios";
 
 export const SIDEBAR_OPTIONS = [
 	{ name: "Home", to: "/", icon: <Home /> },
@@ -26,26 +27,33 @@ export const SIDEBAR_OPTIONS = [
 
 const UserLayout = ({ children }: { children: React.ReactNode }) => {
 	const navigate = useNavigate();
-	const [isCookiePresent, setIsCookiePresent] = useState(false);
+	const [isFound, setIsFound] = useState(false);
 	const location = useLocation();
 	const path = location.pathname;
 
-	let cookies = document.cookie.split(";");
+	const handleLogout = () => {
+		axios({
+			method: "POST",
+			url: `${BACKEND_URL}/logout`,
+			withCredentials: true,
+		}).then((response) => {
+			console.log(response);
+		});
+	};
 
-	console.log(document.cookie);
+	useEffect(() => {
+		axios({
+			method: "GET",
+			url: `${BACKEND_URL}/isLoggedIn`,
+			withCredentials: true,
+		}).then((response) => {
+			console.log(response.data);
 
-	let isFound = false;
-	for (let i = 0; i < cookies.length; i++) {
-		const cookieName = cookies[i].trim().split("=")[0];
-		const cookie = cookies[i].trim().split("=")[1];
-
-		console.log(cookie, cookieName, cookies.length);
-
-		if (cookieName === "auth") isFound = true;
-	}
-
-	if (isFound) setIsCookiePresent(true);
-	else if (isCookiePresent) setIsCookiePresent(false);
+			if (response.data.loggedIn && response.data.role === "user") {
+				setIsFound(true);
+			}
+		});
+	}, [path]);
 
 	return (
 		<div
@@ -62,13 +70,6 @@ const UserLayout = ({ children }: { children: React.ReactNode }) => {
 
 				<div>
 					<div className="flex items-center gap-6">
-						<div>
-							{!isFound && (
-								<button className="px-5 py-2 bg-slate-300 rounded-lg font-semibold shadow-md hover:bg-slate-500 hover:text-white duration-150">
-									Login
-								</button>
-							)}
-						</div>
 						<div className="w-10">
 							<Profile />
 						</div>
@@ -95,6 +96,10 @@ const UserLayout = ({ children }: { children: React.ReactNode }) => {
 										}
 										key={option.name}
 										onClick={() => {
+											if (option.name === "Logout") {
+												handleLogout();
+											}
+
 											navigate(option.to);
 										}}
 									>

@@ -16,6 +16,10 @@ app.use(
 
 dotenv.config();
 
+app.get("/", (req, res) => {
+	res.json({ msg: "Server healthy" });
+});
+
 app.use("/api/v1", router);
 
 app.listen(4000);
