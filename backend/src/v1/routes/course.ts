@@ -2,6 +2,8 @@ import { Router } from "express";
 import { createCourseSchema, updateCourseSchema } from "../types/zod";
 import auth from "../middleware/auth";
 import client from "../utils/prisma";
+import { v4 as uuidv4 } from "uuid";
+import getPresignedUrl from "../utils/getPresignedUrl";
 
 export const courseRouter = Router();
 
@@ -16,7 +18,6 @@ courseRouter.post("/", auth(["Admin"]), async (req, res) => {
 		const name = validateInput.data.name;
 		const description = validateInput.data.description;
 		const price = validateInput.data.price;
-		const imageUrl = validateInput.data.imageUrl;
 		const creatorId = res.locals.Admin.id;
 
 		const creator = await client.course_Creator.findFirst({
@@ -27,23 +28,57 @@ courseRouter.post("/", auth(["Admin"]), async (req, res) => {
 			return;
 		}
 
+		const courseThumbnailId = uuidv4();
+
+		const signedUrl = await getPresignedUrl(courseThumbnailId);
+
 		const course = await client.courses.create({
 			data: {
 				name,
 				description,
 				price,
 				creatorId,
-				imageUrl,
+				imageUrl: `${process.env.CDN_LINK}/${courseThumbnailId}`,
+				isUploaded: false,
 			},
 		});
 
-		res.json({ msg: "Course created successfully" });
+		res.json({
+			msg: "Course created successfully",
+			signedUrl,
+			courseId: course.id,
+		});
 	} catch (err) {
 		console.log(err);
 
 		res.status(500).json({ msg: "Internal server error" });
 	}
 });
+
+courseRouter.post(
+	"/uploadSuccess/:courseId",
+	auth(["Admin"]),
+	async (req, res) => {
+		try {
+			const courseId = req.params.courseId;
+			const adminId = res.locals.Admin.id;
+
+			try {
+				await client.courses.update({
+					where: { id: courseId, creatorId: adminId },
+					data: { isUploaded: true },
+				});
+			} catch (err) {
+				res.status(400).json({ msg: "You aren't the creator of the course" });
+				return;
+			}
+
+			res.json({ msg: "Image link updated successfully" });
+		} catch (err) {
+			res.status(500).json({ msg: "Internal Server Error" });
+		}
+	}
+);
 
 courseRouter.put("/", auth(["Admin"]), async (req, res) => {
 	try {

@@ -17,7 +17,6 @@ const CreatorHomeComp = () => {
 		handleNameChange,
 		handlePriceChange,
 		handleCreateCourse,
-		imageUrl,
 		name,
 		price,
 	} = useCreatorHome();
@@ -126,10 +125,10 @@ const CreatorHomeComp = () => {
 							</label>
 							<Input
 								id="image"
-								value={imageUrl}
+								type="file"
+								accept="image/*"
 								onChange={handleImageUrlChange}
 								className="w-full"
-								placeholder="https://example.com/course-image.jpg"
 							/>
 						</div>
 

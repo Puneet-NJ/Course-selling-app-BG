@@ -10,7 +10,7 @@ import { useSetRecoilState } from "recoil";
 const useCreatorCourseComp = () => {
 	const [desc, setDesc] = useState("");
 	const [price, setPrice] = useState(0);
-	const [imageUrl, setImageUrl] = useState("");
+	const [imageUrl, setImageUrl] = useState<File | null>(null);
 	const setCourseAtom = useSetRecoilState(courseAtom);
 	const params = useParams();
 	const navigate = useNavigate();
@@ -63,7 +63,9 @@ const useCreatorCourseComp = () => {
 	};
 
 	const handleImageUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		setImageUrl(e.target.value);
+		if (!e.target.files?.[0]) return;
+
+		setImageUrl(e.target.files[0]);
 	};
 
 	const handleEditCourse = (e: React.FormEvent<HTMLFormElement>) => {

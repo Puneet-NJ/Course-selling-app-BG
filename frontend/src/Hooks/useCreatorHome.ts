@@ -4,33 +4,13 @@ import { BACKEND_URL } from "../utils/lib";
 import { useSetRecoilState } from "recoil";
 import { creatorAtom } from "../utils/atoms";
 import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
 
 const useCreatorHome = () => {
 	const [name, setName] = useState("");
 	const [desc, setDesc] = useState("");
 	const [price, setPrice] = useState(0);
-	const [imageUrl, setImageUrl] = useState("");
+	const [imageUrl, setImageUrl] = useState<File | null>(null);
 	const setCreatorData = useSetRecoilState(creatorAtom);
-
-	const createCourseMutate = useMutation({
-		mutationFn: () =>
-			axios({
-				method: "POST",
-				url: `${BACKEND_URL}/course`,
-				data: { name, description: desc, price, imageUrl },
-				withCredentials: true,
-			}),
-
-		onSuccess: () => {
-			fetchCourses();
-
-			setName("");
-			setDesc("");
-			setPrice(0);
-			setImageUrl("");
-		},
-	});
 
 	const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		setName(e.target.value);
@@ -45,13 +25,51 @@ const useCreatorHome = () => {
 	};
 
 	const handleImageUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		setImageUrl(e.target.value);
+		if (!e.target.files?.[0]) return;
+
+		setImageUrl(e.target.files[0]);
 	};
 
-	const handleCreateCourse = (e: React.FormEvent<HTMLFormElement>) => {
+	const handleCreateCourse = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 
-		createCourseMutate.mutate();
+		try {
+			// Send the form data & Get Pre-signed URL from the backend
+			const signedUrlResponse = await axios({
+				method: "POST",
+				url: `${BACKEND_URL}/course/`,
+				withCredentials: true,
+				data: { name, description: desc, price },
+			});
+			const { signedUrl, courseId } = signedUrlResponse.data;
+
+			// Put the image in S3
+
+			const s3Response = await axios({
+				method: "PUT",
+				url: `${signedUrl}`,
+				data: imageUrl,
+				headers: { "Content-Type": "image/png" },
+			});
+			if (s3Response.status !== 200) return;
+
+			// Send confirmation to backend
+			const backendUpdateResponse = await axios({
+				method: "POST",
+				url: `${BACKEND_URL}/course/uploadSuccess/${courseId}`,
+				withCredentials: true,
+			});
+			if (backendUpdateResponse.status !== 200) return;
+		} catch (err) {
+			console.log("Error while putting the data in db or s3 ", err);
+		}
+
+		fetchCourses();
+
+		setName("");
+		setDesc("");
+		setPrice(0);
+		setImageUrl(null);
 	};
 
 	const fetchCourses = useCallback(async () => {

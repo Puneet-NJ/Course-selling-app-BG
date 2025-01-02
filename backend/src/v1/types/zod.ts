@@ -15,7 +15,6 @@ export const createCourseSchema = z.object({
 	name: z.string(),
 	description: z.string(),
 	price: z.number(),
-	imageUrl: z.string(),
 });
 
 export const updateCourseSchema = z.object({

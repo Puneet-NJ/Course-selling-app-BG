@@ -37,6 +37,7 @@ model Courses {
   description String
   price Int
   imageUrl String
+  isUploaded Boolean @default(true)
 
   creatorId String
   creator Course_Creator @relation(fields: [creatorId], references: [id])

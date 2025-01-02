@@ -65,10 +65,10 @@ const CreatorCourseComp = () => {
 							</label>
 							<Input
 								id="image"
-								value={imageUrl}
+								type="file"
+								accept="image/*"
 								onChange={handleImageUrlChange}
 								className="w-full"
-								placeholder="https://example.com/course-image.jpg"
 							/>
 						</div>
 
