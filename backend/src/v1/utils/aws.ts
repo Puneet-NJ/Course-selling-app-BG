@@ -36,8 +36,6 @@ export const deleteImageFromS3 = (prevImageKey: string) => {
 				console.log(err);
 				return;
 			}
-
-			console.log(data);
 		}
 	);
 };

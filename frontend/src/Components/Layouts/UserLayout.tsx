@@ -36,7 +36,7 @@ const UserLayout = ({ children }: { children: React.ReactNode }) => {
 
 	const handleLogout = () => {
 		axios({
-			method: "POST",
+			method: "DELETE",
 			url: `${BACKEND_URL}/logout`,
 			withCredentials: true,
 		}).then(() => {

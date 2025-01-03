@@ -2,6 +2,9 @@ import axios from "axios";
 import { useState } from "react";
 import { BACKEND_URL } from "../utils/lib";
 import { Link, useNavigate } from "react-router-dom";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { Input } from "./ui/input";
+import { Button } from "./ui/button";
 
 const SigninComp = () => {
 	const [email, setEmail] = useState("");
@@ -9,105 +12,89 @@ const SigninComp = () => {
 	const [role, setRole] = useState("student");
 	const navigate = useNavigate();
 
-	const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		setEmail(e.target.value);
-	};
-
-	const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		setPassword(e.target.value);
-	};
-
-	const handleRoleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-		setRole(e.target.value);
-	};
-
 	const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 
-		let userKind;
-		if (role === "student") userKind = "user";
-		else userKind = "admin";
+		const userKind = role === "student" ? "user" : "admin";
 
-		const response = await axios({
-			method: "POST",
-			url: `${BACKEND_URL}/${userKind}/signin`,
-			withCredentials: true,
-			data: {
-				email,
-				password,
-			},
-		});
+		try {
+			const response = await axios.post(
+				`${BACKEND_URL}/${userKind}/signin`,
+				{
+					email,
+					password,
+				},
+				{ withCredentials: true }
+			);
 
-		if (response.status === 200) {
-			if (userKind === "user") navigate("/");
-			else navigate("/creator/");
+			if (response.status === 200) {
+				navigate(userKind === "user" ? "/" : "/creator/");
+			}
+		} catch (error) {
+			console.error("Error signing in:", error);
 		}
 	};
 
 	return (
-		<form
-			onSubmit={handleFormSubmit}
-			className="w-1/3 px-7 py-10 flex flex-col gap-7 border shadow-xl rounded-lg bg-slate-300"
-		>
-			<div className="flex flex-col gap-2">
-				<label htmlFor="email" className="font-medium">
-					Email
-				</label>
-				<input
-					id="email"
-					placeholder="john@mail.com"
-					value={email}
-					onChange={handleEmailChange}
-					className="py-2 px-4 border outline-none"
-				/>
-			</div>
+		<Card className="w-full max-w-md mx-auto mt-8 shadow-2xl">
+			<CardHeader>
+				<CardTitle className="text-center text-xl font-bold">Sign In</CardTitle>
+			</CardHeader>
+			<CardContent>
+				<form className="space-y-6" onSubmit={handleFormSubmit}>
+					<div className="space-y-2">
+						<label htmlFor="email" className="text-sm font-medium">
+							Email
+						</label>
+						<Input
+							id="email"
+							placeholder="john@mail.com"
+							value={email}
+							onChange={(e) => setEmail(e.target.value)}
+						/>
+					</div>
 
-			<div className="flex flex-col gap-2">
-				<label htmlFor="pass" className="font-medium">
-					Password
-				</label>
-				<input
-					id="pass"
-					placeholder="John Doe"
-					type="password"
-					value={password}
-					onChange={handlePasswordChange}
-					className="py-2 px-4 border outline-none"
-				/>
-			</div>
+					<div className="space-y-2">
+						<label htmlFor="password" className="text-sm font-medium">
+							Password
+						</label>
+						<Input
+							id="password"
+							type="password"
+							placeholder="Enter your password"
+							value={password}
+							onChange={(e) => setPassword(e.target.value)}
+						/>
+					</div>
 
-			<div className="flex flex-col gap-2">
-				<label htmlFor="role" className="font-medium">
-					Role
-				</label>
-				<select
-					id="role"
-					name="role"
-					onChange={handleRoleChange}
-					value={role}
-					className="py-2 px-4 outline-none"
-				>
-					<option value="student">Student</option>
-					<option value="creator">Creator</option>
-				</select>
-			</div>
+					<div className="space-y-2">
+						<label htmlFor="role" className="text-sm font-medium">
+							Role
+						</label>
+						<select
+							id="role"
+							value={role}
+							onChange={(e) => setRole(e.target.value)}
+							className="w-full px-4 py-2 border rounded-md outline-none focus:ring-2 focus:ring-indigo-500"
+						>
+							<option value="student">Student</option>
+							<option value="creator">Creator</option>
+						</select>
+					</div>
 
-			<div className="flex flex-col gap-4">
-				<button
-					type="submit"
-					className="w-full py-2 bg-slate-400 hover:bg-slate-600 hover:text-white duration-150 font-medium rounded"
-				>
-					Sign in
-				</button>
+					<Button type="submit" className="w-full">
+						Sign In
+					</Button>
 
-				<p className="text-center text-sm font-medium">
-					Haven't Signed Up?{" "}
-					<Link to={"/signup"} className="hover:underline">
-						Sign Up
-					</Link>
-				</p>
-			</div>
-		</form>
+					<p className="text-center text-sm font-medium">
+						Haven't Signed Up?{" "}
+						<Link to="/signup" className="text-indigo-600 hover:underline">
+							Sign Up
+						</Link>
+					</p>
+				</form>
+			</CardContent>
+		</Card>
 	);
 };
 
