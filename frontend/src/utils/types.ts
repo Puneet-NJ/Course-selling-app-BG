@@ -9,6 +9,5 @@ export type Course = {
 export type UpdateCourse = {
 	description: string;
 	price: number;
-	imageUrl: string;
 	courseId: string;
 };

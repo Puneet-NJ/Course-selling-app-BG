@@ -15,7 +15,7 @@ const initilizeAws = () => {
 	return s3;
 };
 
-const getPresignedUrl = (courseThumbnailId: string) => {
+export const getPresignedUrl = (courseThumbnailId: string) => {
 	initilizeAws();
 
 	return s3.getSignedUrlPromise("putObject", {
@@ -26,4 +26,18 @@ const getPresignedUrl = (courseThumbnailId: string) => {
 	});
 };
 
-export default getPresignedUrl;
+export const deleteImageFromS3 = (prevImageKey: string) => {
+	initilizeAws();
+
+	s3.deleteObject(
+		{ Bucket: "puneet-course-app", Key: prevImageKey },
+		function (err, data) {
+			if (err) {
+				console.log(err);
+				return;
+			}
+
+			console.log(data);
+		}
+	);
+};

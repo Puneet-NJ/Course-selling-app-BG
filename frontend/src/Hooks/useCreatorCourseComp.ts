@@ -1,6 +1,5 @@
 import { courseAtom } from "@/utils/atoms";
 import { BACKEND_URL } from "@/utils/lib";
-import { UpdateCourse } from "@/utils/types";
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import { useCallback, useEffect, useState } from "react";
@@ -15,16 +14,6 @@ const useCreatorCourseComp = () => {
 	const params = useParams();
 	const navigate = useNavigate();
 
-	const updateCourseMutation = useMutation({
-		mutationFn: (data: UpdateCourse) =>
-			axios({
-				method: "PUT",
-				url: `${BACKEND_URL}/course`,
-				data: data,
-				withCredentials: true,
-			}),
-	});
-
 	const deleteCourseMutation = useMutation({
 		mutationFn: () =>
 			axios({
@@ -32,6 +21,10 @@ const useCreatorCourseComp = () => {
 				url: `${BACKEND_URL}/course/${params.courseId}`,
 				withCredentials: true,
 			}),
+
+		onSuccess: () => {
+			navigate("/creator");
+		},
 	});
 
 	const fetchCourse = useCallback(async () => {
@@ -68,21 +61,44 @@ const useCreatorCourseComp = () => {
 		setImageUrl(e.target.files[0]);
 	};
 
-	const handleEditCourse = (e: React.FormEvent<HTMLFormElement>) => {
+	const handleEditCourse = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 
-		updateCourseMutation.mutate({
-			description: desc,
-			price,
-			imageUrl,
-			courseId: params.courseId || "",
-		});
+		try {
+			const updateResponse = await axios({
+				method: "PUT",
+				url: `${BACKEND_URL}/course`,
+				data: {
+					description: desc,
+					price,
+					courseId: params.courseId || "",
+				},
+				withCredentials: true,
+			});
+			const { signedUrl, courseId } = updateResponse.data;
+
+			const s3Response = await axios({
+				method: "PUT",
+				url: signedUrl,
+				data: imageUrl,
+				headers: { "Content-Type": "image/png" },
+			});
+			if (s3Response.status !== 200) return;
+
+			await axios({
+				method: "POST",
+				url: `${BACKEND_URL}/course/uploadSuccess/${courseId}`,
+				withCredentials: true,
+			});
+		} catch (err) {
+			console.log(err);
+		}
+
+		fetchCourse();
 	};
 
 	const handleCourseDelete = () => {
 		deleteCourseMutation.mutate();
-
-		navigate("/creator");
 	};
 
 	return {

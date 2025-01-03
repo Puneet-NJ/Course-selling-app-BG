@@ -8,7 +8,6 @@ import { Delete } from "@/utils/Icons";
 const CreatorCourseComp = () => {
 	const {
 		desc,
-		imageUrl,
 		price,
 		handleDescChange,
 		handleImageUrlChange,

@@ -21,5 +21,4 @@ export const updateCourseSchema = z.object({
 	courseId: z.string(),
 	description: z.string(),
 	price: z.number(),
-	imageUrl: z.string(),
 });

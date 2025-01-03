@@ -3,7 +3,7 @@ import { createCourseSchema, updateCourseSchema } from "../types/zod";
 import auth from "../middleware/auth";
 import client from "../utils/prisma";
 import { v4 as uuidv4 } from "uuid";
-import getPresignedUrl from "../utils/getPresignedUrl";
+import { getPresignedUrl, deleteImageFromS3 } from "../utils/aws";
 
 export const courseRouter = Router();
 
@@ -90,7 +90,6 @@ courseRouter.put("/", auth(["Admin"]), async (req, res) => {
 
 		const description = validateInput.data.description;
 		const price = validateInput.data.price;
-		const imageUrl = validateInput.data.imageUrl;
 
 		const courseId = validateInput.data.courseId;
 		const id = res.locals.Admin.id;
@@ -108,6 +107,14 @@ courseRouter.put("/", auth(["Admin"]), async (req, res) => {
 			return;
 		}
 
+		const prevImageUrl = isUsersCourse.imageUrl.split(
+			process.env.CDN_LINK as string
+		);
+
+		const courseThumbnailId = uuidv4();
+
+		const signedUrl = await getPresignedUrl(courseThumbnailId);
+
 		const response = await client.courses.update({
 			where: {
 				id: courseId,
@@ -115,11 +122,19 @@ courseRouter.put("/", auth(["Admin"]), async (req, res) => {
 			data: {
 				description,
 				price,
-				imageUrl,
+				imageUrl: `${process.env.CDN_LINK}/${courseThumbnailId}`,
+				isUploaded: false,
 			},
 		});
 
-		res.json({ msg: "Course info updated successfully", course: response });
+		const prevImageKey = prevImageUrl[1].slice(1);
+		deleteImageFromS3(prevImageKey);
+
+		res.json({
+			msg: "Course info updated successfully",
+			courseId: response.id,
+			signedUrl,
+		});
 	} catch (err) {
 		res.status(500).json({ msg: "Internal server error" });
 	}
@@ -147,9 +162,14 @@ courseRouter.delete("/:courseId", auth(["Admin"]), async (req, res) => {
 			return;
 		}
 
+		const prevImageUrl = course.imageUrl.split(process.env.CDN_LINK as string);
+
 		const response = await client.courses.delete({
 			where: { id: courseId },
 		});
+
+		const prevImageKey = prevImageUrl[1].slice(1);
+		deleteImageFromS3(prevImageKey);
 
 		res.json({ msg: "Course deleted successfully" });
 	} catch (err) {
