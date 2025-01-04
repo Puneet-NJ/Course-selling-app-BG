@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { signinSchema, signupSchema } from "../types/zod";
-import { compare, hash } from "bcrypt";
+import { compare, hash } from "bcryptjs";
 import client from "../utils/prisma";
 import jwt from "jsonwebtoken";
 import auth from "../middleware/auth";
