@@ -28,6 +28,7 @@ jobs:
           file: ./Dockerfile.backend
           push: true
           tags: puneetnj/course-app-be:latest
+          platforms: linux/amd64,linux/arm64
           cache-from: type=registry,ref=puneetnj/course-app-be:latest
           cache-to: type=inline
           build-args: |
@@ -45,6 +46,7 @@ jobs:
           file: ./Dockerfile.frontend
           push: true
           tags: puneetnj/course-app-fe:latest
+          platforms: linux/amd64,linux/arm64
           cache-from: type=registry,ref=puneetnj/course-app-fe:latest
           cache-to: type=inline
 
