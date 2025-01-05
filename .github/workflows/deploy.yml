@@ -59,3 +59,34 @@ jobs:
         run: |
           docker pull puneetnj/course-app-fe:latest
           docker image inspect puneetnj/course-app-fe:latest
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            sudo docker pull puneetnj/course-app-be:latest
+            sudo docker stop course-app-be || true
+            sudo docker rm course-app-be || true
+            sudo docker run -d --name course-app-be -p 4000:4000 puneetnj/course-app-be:latest
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Pull and Extract Frontend Assets
+        run: |
+          docker pull puneetnj/course-app-fe:latest
+          docker create --name temp_container puneetnj/course-app-fe:latest
+          docker cp temp_container:/usr/share/nginx/html/. ./dist
+          docker rm temp_container
+
+      - name: Deploy to S3
+        run: |
+          aws s3 sync dist s3://${{ secrets.S3_BUCKET }} --delete
+          aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
