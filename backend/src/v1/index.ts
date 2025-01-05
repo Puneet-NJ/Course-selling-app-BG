@@ -21,7 +21,7 @@ router.get(
 				return;
 			}
 
-			res.json({ loggedIn: false });
+			res.json({ loggedIn: false, msg: "Token was present" });
 		} catch (err) {
 			res.status(500).json({ msg: "Internal Server Error" });
 		}

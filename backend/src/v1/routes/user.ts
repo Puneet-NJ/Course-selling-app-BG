@@ -47,7 +47,8 @@ userRouter.post("/signup", async (req, res) => {
 		res.cookie("auth", token, {
 			httpOnly: true,
 			sameSite: "none",
-			secure: process.env.NODE_ENV === "production",
+			secure: true,
+			path: "/",
 		});
 
 		res.json({ msg: "Sign up successful" });
@@ -91,7 +92,8 @@ userRouter.post("/signin", async (req, res) => {
 		res.cookie("auth", token, {
 			httpOnly: true,
 			sameSite: "none",
-			secure: process.env.NODE_ENV === "production",
+			secure: true,
+			path: "/",
 		});
 
 		res.json({ msg: "Sign in successful" });

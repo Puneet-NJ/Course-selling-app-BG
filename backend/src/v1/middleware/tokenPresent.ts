@@ -7,7 +7,9 @@ const tokenPresent = (req: Request, res: Response, next: NextFunction) => {
 		if (!token) {
 			res.locals.tokenPresent = false;
 
-			res.json({ loggedIn: false });
+			console.log("TOken is absent");
+
+			res.json({ loggedIn: false, msg: "Token is not present" });
 			return;
 		}
 
