@@ -46,9 +46,9 @@ adminRouter.post("/signup", async (req, res) => {
 
 		res.cookie("auth", token, {
 			httpOnly: true,
-			sameSite: "lax",
+			sameSite: "none",
 			secure: process.env.NODE_ENV === "production",
-			domain: "localhost",
+			domain: "course-app.puneetnj.fun",
 		});
 
 		res.json({ msg: "Sign up successful" });
@@ -91,9 +91,9 @@ adminRouter.post("/signin", async (req, res) => {
 
 		res.cookie("auth", token, {
 			httpOnly: true,
-			sameSite: "lax",
+			sameSite: "none",
 			secure: process.env.NODE_ENV === "production",
-			domain: "localhost",
+			domain: "course-app.puneetnj.fun",
 		});
 
 		res.json({ msg: "Sign in successful" });
