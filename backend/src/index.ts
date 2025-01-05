@@ -9,7 +9,7 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(
 	cors({
-		origin: "https://course-app.puneetnj.fun/",
+		origin: "https://course-app.puneetnj.fun",
 		credentials: true,
 	})
 );
