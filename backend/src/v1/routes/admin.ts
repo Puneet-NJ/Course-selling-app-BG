@@ -48,7 +48,6 @@ adminRouter.post("/signup", async (req, res) => {
 			httpOnly: true,
 			sameSite: "none",
 			secure: process.env.NODE_ENV === "production",
-			domain: "course-app.puneetnj.fun",
 		});
 
 		res.json({ msg: "Sign up successful" });
@@ -93,7 +92,6 @@ adminRouter.post("/signin", async (req, res) => {
 			httpOnly: true,
 			sameSite: "none",
 			secure: process.env.NODE_ENV === "production",
-			domain: "course-app.puneetnj.fun",
 		});
 
 		res.json({ msg: "Sign in successful" });
