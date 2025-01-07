@@ -11,3 +11,29 @@ export type UpdateCourse = {
 	price: number;
 	courseId: string;
 };
+
+export type CourseContent = {
+	name: string;
+	id: string;
+	isUploaded: boolean;
+	contentUrl: string;
+	courseFolderId: string;
+};
+
+type CourseFolder = {
+	courseContents: CourseContent[];
+	name: string;
+	id: string;
+	courseId: string;
+};
+
+export type PurchasedCourse = {
+	courseFolders: CourseFolder[];
+	creatorId: string;
+	description: string;
+	id: string;
+	imageUrl: string;
+	name: string;
+	isUploaded: boolean;
+	price: number;
+};

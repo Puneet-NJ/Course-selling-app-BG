@@ -10,15 +10,36 @@ const useCreatorCourseComp = () => {
 	const [desc, setDesc] = useState("");
 	const [price, setPrice] = useState(0);
 	const [imageUrl, setImageUrl] = useState<File | null>(null);
+	const [folderName, setFolderName] = useState("");
+	const [courseContent, setCourseContent] = useState<
+		| ({
+				courseContents: {
+					id: string;
+					name: string;
+					isUploaded: boolean;
+					courseFolderId: string;
+				}[];
+		  } & {
+				courseId: string;
+				id: string;
+				name: string;
+		  })[]
+		| null
+	>(null);
+	const [video, setVideo] = useState<File | null>(null);
+	const [videoName, setVideoName] = useState<Map<number, string>>();
+
 	const setCourseAtom = useSetRecoilState(courseAtom);
 	const params = useParams();
 	const navigate = useNavigate();
+
+	const courseId = params.courseId;
 
 	const deleteCourseMutation = useMutation({
 		mutationFn: () =>
 			axios({
 				method: "DELETE",
-				url: `${BACKEND_URL}/course/${params.courseId}`,
+				url: `${BACKEND_URL}/course/${courseId}`,
 				withCredentials: true,
 			}),
 
@@ -27,14 +48,34 @@ const useCreatorCourseComp = () => {
 		},
 	});
 
+	const addFolderMutation = useMutation({
+		mutationFn: () =>
+			axios({
+				method: "POST",
+				url: `${BACKEND_URL}/course/createFolder`,
+				data: {
+					name: folderName,
+					courseId: courseId,
+				},
+				withCredentials: true,
+			}),
+
+		onSuccess: () => {
+			fetchCourse();
+		},
+	});
+
 	const fetchCourse = useCallback(async () => {
 		const response = await axios({
 			method: "GET",
-			url: `${BACKEND_URL}/course/${params.courseId}`,
+			url: `${BACKEND_URL}/course/${courseId}`,
 			withCredentials: true,
 		});
 
 		const data = response.data;
+
+		console.log(data.course.courseFolders);
+		setCourseContent(data.course.courseFolders);
 
 		setCourseAtom(data.course);
 
@@ -71,11 +112,11 @@ const useCreatorCourseComp = () => {
 				data: {
 					description: desc,
 					price,
-					courseId: params.courseId || "",
+					courseId: courseId || "",
 				},
 				withCredentials: true,
 			});
-			const { signedUrl, courseId } = updateResponse.data;
+			const { signedUrl } = updateResponse.data;
 
 			const s3Response = await axios({
 				method: "PUT",
@@ -85,11 +126,12 @@ const useCreatorCourseComp = () => {
 			});
 			if (s3Response.status !== 200) return;
 
-			await axios({
+			const backendUpdateResponse = await axios({
 				method: "POST",
 				url: `${BACKEND_URL}/course/uploadSuccess/${courseId}`,
 				withCredentials: true,
 			});
+			if (backendUpdateResponse.status !== 200) return;
 		} catch (err) {
 			console.log(err);
 		}
@@ -101,15 +143,68 @@ const useCreatorCourseComp = () => {
 		deleteCourseMutation.mutate();
 	};
 
+	const handleAddFolder = () => {
+		if (folderName === "") return;
+
+		addFolderMutation.mutate();
+	};
+
+	const handleVideoAdd = async (
+		videoName: string | undefined,
+		folderId: string
+	) => {
+		if (!videoName || videoName === "" || video === null) return;
+
+		try {
+			const postResponse = await axios({
+				method: "POST",
+				url: `${BACKEND_URL}/course/postContent`,
+				data: { name: videoName, folderId: folderId },
+				withCredentials: true,
+			});
+			const { signedUrl, contentId } = postResponse.data;
+
+			const s3Response = await axios({
+				method: "PUT",
+				url: `${signedUrl}`,
+				data: video,
+				headers: { "Content-Type": "video/mp4" },
+			});
+			if (s3Response.status !== 200) return;
+
+			const backendUpdateResponse = await axios({
+				method: "POST",
+				url: `${BACKEND_URL}/course/contentUploaded/${contentId}`,
+				withCredentials: true,
+			});
+			if (backendUpdateResponse.status !== 200) return;
+		} catch (err) {
+			console.log(err);
+		}
+
+		setVideoName(new Map());
+		setVideo(null);
+
+		fetchCourse();
+	};
+
 	return {
 		desc,
 		price,
 		imageUrl,
+		folderName,
+		courseContent,
+		videoName,
+		setVideoName,
+		setVideo,
+		setFolderName,
 		handleDescChange,
 		handlePriceChange,
 		handleImageUrlChange,
 		handleEditCourse,
 		handleCourseDelete,
+		handleAddFolder,
+		handleVideoAdd,
 	};
 };
 

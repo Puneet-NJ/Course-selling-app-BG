@@ -15,14 +15,14 @@ const initilizeAws = () => {
 	return s3;
 };
 
-export const getPresignedUrl = (courseThumbnailId: string) => {
+export const getPresignedUrl = (objectKey: string, contentType: string) => {
 	initilizeAws();
 
 	return s3.getSignedUrlPromise("putObject", {
 		Bucket: "puneet-course-app",
-		Key: courseThumbnailId,
-		Expires: 60,
-		ContentType: "image/png",
+		Key: objectKey,
+		Expires: 240,
+		ContentType: contentType,
 	});
 };
 

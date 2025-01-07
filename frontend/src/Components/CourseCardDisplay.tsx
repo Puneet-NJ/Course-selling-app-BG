@@ -1,7 +1,15 @@
 import { Course } from "../utils/types";
 import { CourseCard } from "./CourseCard";
 
-export const CourseCardDisplay = ({ courses }: { courses: Course[] }) => {
+export const CourseCardDisplay = ({
+	courses,
+	buttonText,
+	to,
+}: {
+	courses: Course[];
+	buttonText?: string;
+	to?: string;
+}) => {
 	return (
 		<div className="flex justify-between flex-wrap gap-10">
 			{courses.map((course) => (
@@ -10,8 +18,12 @@ export const CourseCardDisplay = ({ courses }: { courses: Course[] }) => {
 					imageUrl={course.imageUrl}
 					title={course.name}
 					price={course.price}
-					buttonText={"View details"}
-					to={`/course/${course.id}`}
+					buttonText={buttonText ? buttonText : "View details"}
+					to={
+						to === "purchasedPage"
+							? `/purchased/${course.id}`
+							: `/course/${course.id}`
+					}
 				/>
 			))}
 		</div>

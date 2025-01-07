@@ -22,3 +22,13 @@ export const updateCourseSchema = z.object({
 	description: z.string(),
 	price: z.number(),
 });
+
+export const createFolderSchema = z.object({
+	courseId: z.string(),
+	name: z.string(),
+});
+
+export const createContentSchema = z.object({
+	folderId: z.string(),
+	name: z.string(),
+});

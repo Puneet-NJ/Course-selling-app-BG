@@ -1,9 +1,15 @@
 import { Router } from "express";
-import { createCourseSchema, updateCourseSchema } from "../types/zod";
+import {
+	createContentSchema,
+	createCourseSchema,
+	createFolderSchema,
+	updateCourseSchema,
+} from "../types/zod";
 import auth from "../middleware/auth";
 import client from "../utils/prisma";
 import { v4 as uuidv4 } from "uuid";
 import { getPresignedUrl, deleteImageFromS3 } from "../utils/aws";
+import { isCourseCreator } from "../utils/lib";
 
 export const courseRouter = Router();
 
@@ -28,9 +34,9 @@ courseRouter.post("/", auth(["Admin"]), async (req, res) => {
 			return;
 		}
 
-		const courseThumbnailId = uuidv4();
+		const courseThumbnailId = `${name}/thumbnail`;
 
-		const signedUrl = await getPresignedUrl(courseThumbnailId);
+		const signedUrl = await getPresignedUrl(courseThumbnailId, "image/png");
 
 		const course = await client.courses.create({
 			data: {
@@ -63,12 +69,11 @@ courseRouter.post(
 			const courseId = req.params.courseId;
 			const adminId = res.locals.Admin.id;
 
-			try {
-				await client.courses.update({
-					where: { id: courseId, creatorId: adminId },
-					data: { isUploaded: true },
-				});
-			} catch (err) {
+			const course = await client.courses.update({
+				where: { id: courseId, creatorId: adminId },
+				data: { isUploaded: true },
+			});
+			if (!course) {
 				res.status(400).json({ msg: "You aren't the creator of the course" });
 				return;
 			}
@@ -107,13 +112,9 @@ courseRouter.put("/", auth(["Admin"]), async (req, res) => {
 			return;
 		}
 
-		const prevImageUrl = isUsersCourse.imageUrl.split(
-			process.env.CDN_LINK as string
-		);
+		const courseThumbnailId = `${courseId}/thumbnail`;
 
-		const courseThumbnailId = uuidv4();
-
-		const signedUrl = await getPresignedUrl(courseThumbnailId);
+		const signedUrl = await getPresignedUrl(courseThumbnailId, "image/png");
 
 		const response = await client.courses.update({
 			where: {
@@ -122,13 +123,9 @@ courseRouter.put("/", auth(["Admin"]), async (req, res) => {
 			data: {
 				description,
 				price,
-				imageUrl: `${process.env.CDN_LINK}/${courseThumbnailId}`,
 				isUploaded: false,
 			},
 		});
-
-		const prevImageKey = prevImageUrl[1].slice(1);
-		deleteImageFromS3(prevImageKey);
 
 		res.json({
 			msg: "Course info updated successfully",
@@ -183,6 +180,7 @@ courseRouter.get("/:courseId", async (req, res) => {
 
 		const course = await client.courses.findFirst({
 			where: { id: courseId },
+			include: { courseFolders: { include: { courseContents: true } } },
 		});
 
 		if (!course) {
@@ -192,7 +190,38 @@ courseRouter.get("/:courseId", async (req, res) => {
 
 		res.json({ course });
 	} catch (err) {
+		console.log(err);
+
 		res.status(500).json({ msg: "Internal server error" });
+	}
+});
+
+courseRouter.get("/:courseId/:contentId", auth(["User"]), async (req, res) => {
+	try {
+		const { courseId, contentId } = req.params;
+		const userId = res.locals.User.id;
+
+		const purchased = await client.purchases.findFirst({
+			where: {
+				userId,
+				courseId,
+			},
+		});
+
+		if (!purchased) {
+			res.status(400).json({ msg: "You have not bought this course" });
+			return;
+		}
+
+		const content = await client.courseContent.findFirst({
+			where: { id: contentId },
+		});
+
+		res.json({ content });
+	} catch (err) {
+		console.log(err);
+
+		res.status(500).json({ msg: "Internal Server Error" });
 	}
 });
 
@@ -207,3 +236,145 @@ courseRouter.get("/", async (req, res) => {
 		res.status(500).json({ msg: "Internal server error" });
 	}
 });
+
+courseRouter.post("/createFolder", auth(["Admin"]), async (req, res) => {
+	try {
+		const validateInput = createFolderSchema.safeParse(req.body);
+		if (!validateInput.success) {
+			res.status(411).json({ msg: "Invalid inputs" });
+			return;
+		}
+
+		const { courseId, name: folderName } = validateInput.data;
+		const creatorId = res.locals.Admin.id;
+
+		//  check if the course is present
+		const isCreator = await isCourseCreator(courseId, creatorId);
+		if (isCreator.status !== 200) {
+			res.status(isCreator.status).json({ msg: isCreator.msg });
+			return;
+		}
+
+		// Course folder present
+		const folderPresent = await client.courseFolder.findFirst({
+			where: {
+				courseId,
+				name: folderName,
+			},
+		});
+		if (folderPresent) {
+			res.status(400).json({ msg: "Folder with similar name already exists" });
+			return;
+		}
+
+		const folder = await client.courseFolder.create({
+			data: {
+				name: folderName,
+				courseId: courseId,
+			},
+		});
+
+		res.json({ msg: "Folder created successfully" });
+	} catch (err) {
+		res.status(500).json({ msg: "Internal Server Error" });
+	}
+});
+
+courseRouter.post("/postContent", auth(["Admin"]), async (req, res) => {
+	try {
+		const validateInput = createContentSchema.safeParse(req.body);
+		if (!validateInput.success) {
+			res.status(411).json({ msg: "Invalid inputs" });
+			return;
+		}
+
+		const creatorId = res.locals.Admin.id;
+		const { folderId, name: contentName } = validateInput.data;
+
+		const folder = await client.courseFolder.findFirst({
+			where: {
+				id: folderId,
+			},
+		});
+		if (!folder) {
+			res.status(411).json({ msg: "Invalid folder ID" });
+			return;
+		}
+
+		const isCreator = await isCourseCreator(folder.courseId, creatorId);
+		if (isCreator.status !== 200) {
+			res.status(isCreator.status).json({ msg: isCreator.msg });
+			return;
+		}
+
+		const courseName = isCreator.course!.name.replace(/\s+/g, "");
+		const folderName = folder.name.replace(/\s+/g, "");
+
+		// already have content name
+
+		function sanitizeName(name: string) {
+			return name.replace(/[^a-zA-Z0-9-]/g, "-");
+		}
+
+		// Sanitize all parts
+		const sanitizedCourseName = sanitizeName(courseName);
+		const sanitizedFolderName = sanitizeName(folderName);
+		const sanitizedContentName = sanitizeName(contentName);
+
+		const objectKey = `${sanitizedCourseName}/${sanitizedFolderName}/${sanitizedContentName}`;
+
+		const encodedObjectKey = encodeURIComponent(objectKey).replace(/%2F/g, "/");
+
+		const signedUrl = await getPresignedUrl(encodedObjectKey, "video/mp4");
+
+		const content = await client.courseContent.create({
+			data: {
+				name: contentName,
+				courseFolderId: folderId,
+				isUploaded: false,
+				contentUrl: `${process.env.CDN_LINK}/${encodedObjectKey}`,
+			},
+		});
+
+		res.json({ signedUrl, contentId: content.id });
+	} catch (err) {
+		res.status(500).json({ msg: "Internal Server Error" });
+	}
+});
+
+courseRouter.post(
+	"/contentUploaded/:contentId",
+	auth(["Admin"]),
+	async (req, res) => {
+		try {
+			const creatorId = res.locals.Admin.id;
+			const contentId = req.params.contentId;
+
+			// need to check if the creator who is trying to update the courseContent is the actual creator of the course or not
+			const course = await client.courseContent.findFirst({
+				where: { id: contentId },
+				include: {
+					courseFolder: { include: { course: true } },
+				},
+			});
+
+			if (course?.courseFolder.course.creatorId !== creatorId) {
+				res.status(400).json({ msg: "You are not the creator of the course" });
+				return;
+			}
+
+			const content = await client.courseContent.update({
+				where: {
+					id: contentId,
+				},
+				data: {
+					isUploaded: true,
+				},
+			});
+
+			res.json({ msg: "Course updated successfully" });
+		} catch (err) {
+			res.status(500).json({ msg: "Internal Server Error" });
+		}
+	}
+);

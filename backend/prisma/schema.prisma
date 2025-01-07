@@ -43,6 +43,33 @@ model Courses {
   creator Course_Creator @relation(fields: [creatorId], references: [id])
 
   purchases Purchases[]
+
+  courseFolders CourseFolder[]
+}
+
+model CourseFolder {
+  id  String @id @default(uuid())
+  name String 
+
+  courseId String 
+  course Courses @relation(fields: [courseId], references: [id])
+
+  @@unique([courseId, name])
+
+  courseContents CourseContent[]
+}
+
+model CourseContent {
+  id  String @id @default(uuid())
+  name String 
+  contentUrl String
+
+  courseFolderId String
+  courseFolder CourseFolder @relation(fields: [courseFolderId], references: [id])
+
+  isUploaded Boolean
+
+  @@unique([courseFolderId, name])
 }
 
 model Purchases {

@@ -9,6 +9,8 @@ import Layout from "./Layout";
 import CreatorHome from "./Pages/CreatorHome";
 import CreatorCourse from "./Pages/CreatorCourse";
 import CreatorCourses from "./Pages/CreatorCourses";
+import PurchasedCourseContent from "./Pages/PurchasedCourseContent";
+import Content from "./Pages/Content";
 
 function App() {
 	return (
@@ -22,6 +24,14 @@ function App() {
 						<Route path="/signup" element={<Signup />} />
 						<Route path="/signin" element={<Signin />} />
 						<Route path="/course/:courseId" element={<Course />} />
+						<Route
+							path="/purchased/:courseId"
+							element={<PurchasedCourseContent />}
+						/>
+						<Route
+							path="/purchased/:courseId/:folderId/:contentId"
+							element={<Content />}
+						/>
 
 						<Route path="/creator" element={<CreatorHome />} />
 						<Route path="/creator/courses" element={<CreatorCourses />} />

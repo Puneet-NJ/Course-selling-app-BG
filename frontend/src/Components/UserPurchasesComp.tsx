@@ -12,7 +12,11 @@ const UserPurchasesComp = () => {
 			<h2 className="h3 text-3xl font-semibold text-center">Purchases</h2>
 
 			<div>
-				<CourseCardDisplay courses={purchasedCourses} />
+				<CourseCardDisplay
+					courses={purchasedCourses}
+					buttonText="View Content"
+					to="purchasedPage"
+				/>
 			</div>
 		</div>
 	);

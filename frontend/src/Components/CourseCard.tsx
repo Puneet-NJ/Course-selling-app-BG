@@ -22,7 +22,6 @@ export const CourseCard = ({
 			<div className="h-[160px]">
 				<img className="rounded-t-lg" src={imageUrl} />
 			</div>
-
 			<div className="py-[5%] px-[7%] flex flex-col h-[190px] justify-between">
 				<h3 className="font-semibold text-lg">{title}</h3>
 
