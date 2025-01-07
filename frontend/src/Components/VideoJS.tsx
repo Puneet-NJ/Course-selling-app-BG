@@ -1,11 +1,22 @@
 import { useEffect, useRef } from "react";
 import videojs from "video.js";
 import Player from "video.js/dist/types/player";
-import { PlayerOptions } from "video.js/dist/types/player";
+// import VideoJsPlayerOptions from "video.js";
 import "video.js/dist/video-js.css";
 
 type VideoJSProps = {
-	options: PlayerOptions;
+	options: {
+		autoplay: boolean;
+		controls: boolean;
+		responsive: boolean;
+		fluid: boolean;
+		sources: [
+			{
+				src: string;
+				type: string;
+			}
+		];
+	};
 	onReady?: (player: Player) => void;
 };
 
