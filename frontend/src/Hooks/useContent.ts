@@ -1,7 +1,7 @@
-import { contentAtom } from "@/utils/atoms";
+import { contentAtom, folderAtom } from "@/utils/atoms";
 import { BACKEND_URL } from "@/utils/lib";
 import axios from "axios";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useSetRecoilState } from "recoil";
 
@@ -11,7 +11,10 @@ const useContent = () => {
 	const folderId = params.folderId;
 	const contentId = params.contentId;
 
+	const [videoUrl, setVideoUrl] = useState("");
+
 	const setContentAtom = useSetRecoilState(contentAtom);
+	const setFolderAtom = useSetRecoilState(folderAtom);
 
 	const fetchPurchasedCourseContent = useCallback(async () => {
 		const response = await axios({
@@ -20,8 +23,12 @@ const useContent = () => {
 			withCredentials: true,
 		});
 		const content = response.data.content;
+		const signedContentUrl = response.data.signedUrl;
+		const folder = response.data.folder;
 
 		setContentAtom(content);
+		setFolderAtom(folder);
+		setVideoUrl(signedContentUrl);
 	}, []);
 
 	useEffect(() => {
@@ -31,6 +38,7 @@ const useContent = () => {
 	return {
 		folderId,
 		contentId,
+		videoUrl,
 	};
 };
 

@@ -1,5 +1,5 @@
 import { atom } from "recoil";
-import { Course, CourseContent, PurchasedCourse } from "./types";
+import { Course, CourseContent, Folder, PurchasedCourse } from "./types";
 
 export const coursesAtom = atom<Course[]>({
 	key: "coursesAtom",
@@ -36,8 +36,16 @@ export const contentAtom = atom<CourseContent>({
 		name: "",
 		id: "",
 		isUploaded: false,
-		contentUrl: "",
 		courseFolderId: "",
+	},
+});
+
+export const folderAtom = atom<Folder>({
+	key: "folderAtom",
+	default: {
+		courseId: "",
+		name: "",
+		id: "",
 	},
 });
 

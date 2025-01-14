@@ -16,7 +16,6 @@ export type CourseContent = {
 	name: string;
 	id: string;
 	isUploaded: boolean;
-	contentUrl: string;
 	courseFolderId: string;
 };
 
@@ -36,4 +35,10 @@ export type PurchasedCourse = {
 	name: string;
 	isUploaded: boolean;
 	price: number;
+};
+
+export type Folder = {
+	courseId: string;
+	name: string;
+	id: string;
 };

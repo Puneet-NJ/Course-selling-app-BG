@@ -27,7 +27,7 @@ const useCreatorCourseComp = () => {
 		| null
 	>(null);
 	const [video, setVideo] = useState<File | null>(null);
-	const [videoName, setVideoName] = useState<Map<number, string>>();
+	const [videoName, setVideoName] = useState<Map<number, string>>(new Map());
 
 	const setCourseAtom = useSetRecoilState(courseAtom);
 	const params = useParams();
@@ -153,6 +153,8 @@ const useCreatorCourseComp = () => {
 		videoName: string | undefined,
 		folderId: string
 	) => {
+		console.log(videoName, folderId);
+
 		if (!videoName || videoName === "" || video === null) return;
 
 		try {

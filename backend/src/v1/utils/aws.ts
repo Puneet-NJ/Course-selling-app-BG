@@ -1,6 +1,12 @@
 import AWS from "aws-sdk";
+import { getSignedUrl } from "aws-cloudfront-sign";
 
 let s3: AWS.S3;
+
+const cfSigningParams = {
+	keypairId: process.env.CF_PUBLIC_KEY as string,
+	privateKeyString: process.env.CF_PRIVATE_KEY as string,
+};
 
 const initilizeAws = () => {
 	if (s3 instanceof AWS.S3) return s3;
@@ -26,6 +32,17 @@ export const getPresignedUrl = (objectKey: string, contentType: string) => {
 	});
 };
 
+export const getPresignedUrlTemp = (objectKey: string, contentType: string) => {
+	initilizeAws();
+
+	return s3.getSignedUrlPromise("putObject", {
+		Bucket: "puneet-course-app-temp",
+		Key: objectKey,
+		Expires: 240,
+		ContentType: contentType,
+	});
+};
+
 export const deleteImageFromS3 = (prevImageKey: string) => {
 	initilizeAws();
 
@@ -38,4 +55,15 @@ export const deleteImageFromS3 = (prevImageKey: string) => {
 			}
 		}
 	);
+};
+
+export const presignedUrlVideo = (objectKey: string) => {
+	initilizeAws();
+
+	const signedUrl = getSignedUrl(
+		process.env.CDN_LINK + `/${objectKey}`,
+		cfSigningParams
+	);
+
+	return signedUrl;
 };

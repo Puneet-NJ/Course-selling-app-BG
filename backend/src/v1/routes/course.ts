@@ -8,8 +8,14 @@ import {
 import auth from "../middleware/auth";
 import client from "../utils/prisma";
 import { v4 as uuidv4 } from "uuid";
-import { getPresignedUrl, deleteImageFromS3 } from "../utils/aws";
+import {
+	getPresignedUrl,
+	deleteImageFromS3,
+	getPresignedUrlTemp,
+	presignedUrlVideo,
+} from "../utils/aws";
 import { isCourseCreator } from "../utils/lib";
+import { ContentStatus } from "@prisma/client";
 
 export const courseRouter = Router();
 
@@ -137,6 +143,7 @@ courseRouter.put("/", auth(["Admin"]), async (req, res) => {
 	}
 });
 
+// Todo: Delete the videos from s3 aswell
 courseRouter.delete("/:courseId", auth(["Admin"]), async (req, res) => {
 	try {
 		const courseId = req.params.courseId;
@@ -217,7 +224,20 @@ courseRouter.get("/:courseId/:contentId", auth(["User"]), async (req, res) => {
 			where: { id: contentId },
 		});
 
-		res.json({ content });
+		if (!content) {
+			res.status(400).json({ msg: "Invalid content Id" });
+			return;
+		}
+
+		const objectKey = `${courseId}/${content.courseFolderId}/${contentId}/master.m3u8`;
+
+		const signedUrl = presignedUrlVideo(objectKey);
+
+		const folder = await client.courseFolder.findFirst({
+			where: { id: content.courseFolderId },
+		});
+
+		res.json({ content, folder, signedUrl });
 	} catch (err) {
 		console.log(err);
 
@@ -307,32 +327,21 @@ courseRouter.post("/postContent", auth(["Admin"]), async (req, res) => {
 			return;
 		}
 
-		const courseName = isCreator.course!.name.replace(/\s+/g, "");
-		const folderName = folder.name.replace(/\s+/g, "");
+		// Create signed url
+		// Create a db entry
+		const courseId = folder.courseId;
+		const contentId = uuidv4();
 
-		// already have content name
+		const objectKey = `${courseId}/${folderId}/${contentId}`;
 
-		function sanitizeName(name: string) {
-			return name.replace(/[^a-zA-Z0-9-]/g, "-");
-		}
-
-		// Sanitize all parts
-		const sanitizedCourseName = sanitizeName(courseName);
-		const sanitizedFolderName = sanitizeName(folderName);
-		const sanitizedContentName = sanitizeName(contentName);
-
-		const objectKey = `${sanitizedCourseName}/${sanitizedFolderName}/${sanitizedContentName}`;
-
-		const encodedObjectKey = encodeURIComponent(objectKey).replace(/%2F/g, "/");
-
-		const signedUrl = await getPresignedUrl(encodedObjectKey, "video/mp4");
+		const signedUrl = await getPresignedUrlTemp(objectKey, "video/mp4");
 
 		const content = await client.courseContent.create({
 			data: {
+				id: contentId,
 				name: contentName,
 				courseFolderId: folderId,
-				isUploaded: false,
-				contentUrl: `${process.env.CDN_LINK}/${encodedObjectKey}`,
+				status: ContentStatus.PROCESSING,
 			},
 		});
 
@@ -342,12 +351,13 @@ courseRouter.post("/postContent", auth(["Admin"]), async (req, res) => {
 	}
 });
 
-courseRouter.post(
+// Todo: add some token auth
+courseRouter.put(
 	"/contentUploaded/:contentId",
-	auth(["Admin"]),
+
 	async (req, res) => {
 		try {
-			const creatorId = res.locals.Admin.id;
+			// const creatorId = res.locals.Admin.id;
 			const contentId = req.params.contentId;
 
 			// need to check if the creator who is trying to update the courseContent is the actual creator of the course or not
@@ -358,22 +368,24 @@ courseRouter.post(
 				},
 			});
 
-			if (course?.courseFolder.course.creatorId !== creatorId) {
-				res.status(400).json({ msg: "You are not the creator of the course" });
-				return;
-			}
+			// if (course?.courseFolder.course.creatorId !== creatorId) {
+			// 	res.status(400).json({ msg: "You are not the creator of the course" });
+			// 	return;
+			// }
 
 			const content = await client.courseContent.update({
 				where: {
 					id: contentId,
 				},
 				data: {
-					isUploaded: true,
+					status: ContentStatus.PROCESSED,
 				},
 			});
 
 			res.json({ msg: "Course updated successfully" });
 		} catch (err) {
+			console.log(err);
+
 			res.status(500).json({ msg: "Internal Server Error" });
 		}
 	}

@@ -62,14 +62,13 @@ model CourseFolder {
 model CourseContent {
   id  String @id @default(uuid())
   name String 
-  contentUrl String
 
   courseFolderId String
   courseFolder CourseFolder @relation(fields: [courseFolderId], references: [id])
 
-  isUploaded Boolean
+  status ContentStatus @default(PENDING)
 
-  @@unique([courseFolderId, name])
+  @@unique([courseFolderId, name]) // ensures the combination of courseFolderId & name are not repeated
 }
 
 model Purchases {
@@ -80,4 +79,11 @@ model Purchases {
 
   courseId  String
   Course Courses @relation(fields: [courseId], references: [id])
+}
+
+enum ContentStatus {
+  PROCESSING
+  PROCESSED
+  PENDING
+  FAILED
 }
