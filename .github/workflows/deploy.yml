@@ -13,16 +13,16 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3 # Added for better build performance
+        uses: docker/setup-buildx-action@v3
 
       - name: Log in to Docker Hub
-        uses: docker/login-action@v3 # Updated to v3
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build and Push Backend Docker image
-        uses: docker/build-push-action@v5 # Updated to v5
+        uses: docker/build-push-action@v5
         with:
           context: .
           file: ./Dockerfile.backend
@@ -38,27 +38,13 @@ jobs:
             AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
             AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
             CDN_LINK=${{ secrets.CDN_LINK }}
-
-      - name: Build and Push Frontend Docker image
-        uses: docker/build-push-action@v5 # Updated to v5
-        with:
-          context: .
-          file: ./Dockerfile.frontend
-          push: true
-          tags: puneetnj/course-app-fe:latest
-          platforms: linux/amd64,linux/arm64
-          cache-from: type=registry,ref=puneetnj/course-app-fe:latest
-          cache-to: type=inline
+            CF_PUBLIC_KEY=${{ secrets.CF_PUBLIC_KEY }}
+            CF_PRIVATE_KEY=${{ secrets.CF_PRIVATE_KEY }}
 
       - name: Verify Backend Image
         run: |
           docker pull puneetnj/course-app-be:latest
           docker image inspect puneetnj/course-app-be:latest
-
-      - name: Verify Frontend Image
-        run: |
-          docker pull puneetnj/course-app-fe:latest
-          docker image inspect puneetnj/course-app-fe:latest
 
       - name: Deploy to EC2
         uses: appleboy/ssh-action@master
@@ -72,6 +58,19 @@ jobs:
             sudo docker rm course-app-be || true
             sudo docker run -d --name course-app-be -p 4000:4000 puneetnj/course-app-be:latest
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+
+      - name: Install Frontend Dependencies
+        working-directory: ./frontend # Adjust this path based on your project structure
+        run: npm install
+
+      - name: Build Frontend
+        working-directory: ./frontend # Adjust this path based on your project structure
+        run: npm run build
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -79,14 +78,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Pull and Extract Frontend Assets
-        run: |
-          docker pull puneetnj/course-app-fe:latest
-          docker create --name temp_container puneetnj/course-app-fe:latest
-          docker cp temp_container:/usr/share/nginx/html/. ./dist
-          docker rm temp_container
-
       - name: Deploy to S3
         run: |
-          aws s3 sync dist s3://${{ secrets.S3_BUCKET }} --delete
+          aws s3 sync frontend/dist s3://${{ secrets.S3_BUCKET }} --delete  
           aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
