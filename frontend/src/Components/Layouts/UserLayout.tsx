@@ -75,7 +75,7 @@ const UserLayout = ({ children }: { children: React.ReactNode }) => {
 	}, [path]);
 
 	const isMobile = useMemo(() => {
-		if (screenSize < 640) {
+		if (screenSize < 768) {
 			setIsMenuBarOpen(false);
 			return true;
 		} else {
