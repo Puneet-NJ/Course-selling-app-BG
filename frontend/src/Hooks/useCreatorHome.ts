@@ -113,8 +113,6 @@ const useCreatorHome = () => {
 	}, [fetchCourses]);
 
 	const isMobile = useMemo(() => {
-		console.log("hi");
-
 		if (screenSize < 640) return true;
 
 		return false;
