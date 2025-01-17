@@ -19,7 +19,6 @@ const useUserHome = () => {
 
 	const isMobile = useMemo(() => {
 		const mobile = screenSize < 640;
-		console.log("Screen size:", screenSize, "isMobile:", mobile);
 		return mobile;
 	}, [screenSize]);
 
