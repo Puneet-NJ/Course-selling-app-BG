@@ -7,37 +7,72 @@ import {
 } from "../utils/lib";
 import useUserHome from "../Hooks/useUserHome";
 import { CourseCardDisplay } from "./CourseCardDisplay";
+import { CourseCard } from "./CourseCard";
 
 const UserHomeComp = () => {
-	const { courses, currImage, imageArray } = useUserHome();
+	const {
+		courses,
+		currImage,
+		imageArray,
+		isMobile,
+		currCourse,
+		isLoading,
+		error,
+	} = useUserHome();
+
+	if (isLoading) {
+		return <div>Loading...</div>;
+	}
+
+	if (error) {
+		return <div>Error loading courses</div>;
+	}
+
+	if (courses.length === 0) {
+		return <div>No courses available</div>;
+	}
 
 	return (
 		<div className="flex flex-col gap-12">
 			<div>
 				<div>
-					<img src={imageArray.current[currImage]} className="rounded-lg" />
+					<img
+						src={imageArray.current[currImage]}
+						className="rounded-lg"
+						alt="course banner"
+					/>
 				</div>
 
 				<div className="flex justify-center items-center gap-4 mt-5">
-					{imageArray.current.map((image, index) => {
-						return (
-							<div
-								key={image}
-								className={
-									"rounded-full " +
-									(index === currImage
-										? "bg-black w-[8px] h-[8px] "
-										: "bg-gray-500 w-[6px] h-[6px] ")
-								}
-							></div>
-						);
-					})}
+					{imageArray.current.map((image, index) => (
+						<div
+							key={image}
+							className={
+								"rounded-full " +
+								(index === currImage
+									? "bg-black w-[8px] h-[8px]"
+									: "bg-gray-500 w-[6px] h-[6px]")
+							}
+						/>
+					))}
 				</div>
 			</div>
 
-			<div className="flex flex-col gap-10">
-				<h3 className="h3 text-3xl font-semibold text-center">Featured</h3>
-				<CourseCardDisplay courses={courses} />
+			<div className="flex flex-col gap-10 mx-auto">
+				<h3 className="h3 text-2xl sm:text-3xl font-semibold text-center">
+					Featured
+				</h3>
+				{!isMobile ? (
+					<CourseCardDisplay courses={courses} />
+				) : (
+					<CourseCard
+						imageUrl={courses[currCourse].imageUrl}
+						title={courses[currCourse].name}
+						price={courses[currCourse].price}
+						buttonText="View details"
+						to={`/course/${courses[currCourse].id}`}
+					/>
+				)}
 			</div>
 
 			<div>
@@ -45,11 +80,11 @@ const UserHomeComp = () => {
 			</div>
 
 			<div className="flex flex-col gap-5">
-				<h3 className="h3 text-3xl font-semibold text-center">
+				<h3 className="h3 text-2xl sm:text-3xl font-semibold text-center">
 					About 100xDevs
 				</h3>
 
-				<div className="flex flex-col gap-5 leading-7 bg-slate-200 px-10 py-4 shadow-lg rounded-lg">
+				<div className="flex flex-col gap-5 bg-slate-200 px-10 py-4 shadow-lg rounded-lg text-xs sm:text-base leading-6 sm:leading-7">
 					<div>{ABOUT_CONTENT1}</div>
 					<div>{ABOUT_CONTENT2}</div>
 					<div>{ABOUT_CONTENT3}</div>

@@ -15,10 +15,8 @@ export const CourseCard = ({
 	buttonText,
 	to,
 }: Props) => {
-	console.log(to);
-
 	return (
-		<div className="border w-72 shadow-lg rounded-lg">
+		<div className="border w-72 shadow-lg rounded-lg hover:shadow-xl transition-shadow">
 			<div className="h-[160px]">
 				<img className="rounded-t-lg" src={imageUrl} />
 			</div>

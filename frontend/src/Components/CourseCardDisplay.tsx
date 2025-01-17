@@ -11,7 +11,7 @@ export const CourseCardDisplay = ({
 	to?: string;
 }) => {
 	return (
-		<div className="flex justify-between flex-wrap gap-10">
+		<div className="flex justify-center flex-wrap gap-10 mx-auto">
 			{courses.map((course) => (
 				<CourseCard
 					key={course.id}

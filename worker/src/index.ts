@@ -80,7 +80,6 @@ const getVideo = async (
 		console.log(err);
 	}
 };
-
 const transcodeVideo = async (videoPath: string, videoContentPath: string) => {
 	try {
 		const quality360 = path.join(videoPath, "360p");
@@ -93,19 +92,12 @@ const transcodeVideo = async (videoPath: string, videoContentPath: string) => {
 		fs.mkdirSync(quality720);
 		fs.writeFileSync(masterFile, "");
 
-		// 		const command = `
-		// ffmpeg -i ${videoContentPath} \
-		//   -c:v h264 -c:a aac -b:a 128k \
-		//   -s 640x360 -b:v 800k -hls_time 6 -hls_playlist_type vod -hls_segment_filename "${quality360}/360p_%03d.ts" ${quality360}/index.m3u8 \
-		//   -s 854x480 -b:v 1400k -hls_time 6 -hls_playlist_type vod -hls_segment_filename "${quality480}/480p_%03d.ts" ${quality480}/index.m3u8 \
-		//   -s 1280x720 -b:v 2800k -hls_time 6 -hls_playlist_type vod -hls_segment_filename "${quality720}/720p_%03d.ts" ${quality720}/index.m3u8
-		// `;
-
 		const command = `
 ffmpeg -i ${videoContentPath} \
   -c:v h264 -c:a aac -b:a 128k \
   -s 640x360 -b:v 800k -hls_time 6 -hls_playlist_type vod -hls_segment_filename "${quality360}/360p_%03d.ts" ${quality360}/index.m3u8 \
   -s 854x480 -b:v 1400k -hls_time 6 -hls_playlist_type vod -hls_segment_filename "${quality480}/480p_%03d.ts" ${quality480}/index.m3u8 \
+  -s 1280x720 -b:v 2800k -hls_time 6 -hls_playlist_type vod -hls_segment_filename "${quality720}/720p_%03d.ts" ${quality720}/index.m3u8 \
   -master_pl_name "${masterFile}"`;
 
 		const process = exec(command, (error, stdout, stderr) => {
@@ -129,7 +121,9 @@ ffmpeg -i ${videoContentPath} \
 #EXT-X-STREAM-INF:BANDWIDTH=800000,RESOLUTION=640x360
 360p/index.m3u8
 #EXT-X-STREAM-INF:BANDWIDTH=1400000,RESOLUTION=854x480
-480p/index.m3u8`;
+480p/index.m3u8
+#EXT-X-STREAM-INF:BANDWIDTH=2800000,RESOLUTION=1280x720
+720p/index.m3u8`;
 
 					fs.writeFileSync(masterFile, masterContent);
 					resolve("");

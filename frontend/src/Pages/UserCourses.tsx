@@ -11,7 +11,7 @@ const UserCourses = () => {
 		<div className="flex flex-col gap-7">
 			<h2 className="h3 text-3xl font-semibold text-center">Courses</h2>
 
-			<div>
+			<div className="">
 				<CourseCardDisplay courses={courses} />
 			</div>
 		</div>

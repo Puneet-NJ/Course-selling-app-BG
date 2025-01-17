@@ -1,9 +1,10 @@
 import axios from "axios";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { BACKEND_URL } from "../utils/lib";
 import { useSetRecoilState } from "recoil";
 import { creatorAtom } from "../utils/atoms";
 import { useState } from "react";
+import { useRecoilValue } from "recoil";
 
 const useCreatorHome = () => {
 	const [name, setName] = useState("");
@@ -11,6 +12,11 @@ const useCreatorHome = () => {
 	const [price, setPrice] = useState(0);
 	const [imageUrl, setImageUrl] = useState<File | null>(null);
 	const setCreatorData = useSetRecoilState(creatorAtom);
+
+	const [screenSize, setScreensize] = useState(innerWidth);
+	const [currCourseCard, setCurrCourseCard] = useState(0);
+
+	const { courses, name: creatorName } = useRecoilValue(creatorAtom);
 
 	const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		setName(e.target.value);
@@ -84,13 +90,45 @@ const useCreatorHome = () => {
 
 	useEffect(() => {
 		fetchCourses();
+
+		window.addEventListener("resize", () => {
+			setScreensize(innerWidth);
+		});
+
+		const currCourseInterval = setInterval(() => {
+			setCurrCourseCard((prev) => {
+				if (prev === 2) return 0;
+
+				return prev + 1;
+			});
+		}, 3000);
+
+		return () => {
+			clearInterval(currCourseInterval);
+
+			window.removeEventListener("resize", () => {
+				setScreensize(innerWidth);
+			});
+		};
 	}, [fetchCourses]);
+
+	const isMobile = useMemo(() => {
+		console.log("hi");
+
+		if (screenSize < 640) return true;
+
+		return false;
+	}, [screenSize]);
 
 	return {
 		name,
 		desc,
 		price,
 		imageUrl,
+		isMobile,
+		courses: courses.slice(0, 3),
+		creatorName,
+		currCourseCard,
 		handleDescChange,
 		handleImageUrlChange,
 		handleNameChange,

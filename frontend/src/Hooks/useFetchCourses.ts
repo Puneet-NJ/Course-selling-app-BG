@@ -21,8 +21,14 @@ const useFetchCourses = () => {
 	});
 
 	useEffect(() => {
+		console.log("Fetching courses...");
 		mutation.mutate();
 	}, []);
+
+	return {
+		isLoading: mutation.isLoading,
+		error: mutation.error,
+	};
 };
 
 export default useFetchCourses;

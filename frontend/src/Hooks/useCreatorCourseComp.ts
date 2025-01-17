@@ -9,6 +9,7 @@ import { useSetRecoilState } from "recoil";
 const useCreatorCourseComp = () => {
 	const [desc, setDesc] = useState("");
 	const [price, setPrice] = useState(0);
+	const [name, setName] = useState("");
 	const [imageUrl, setImageUrl] = useState<File | null>(null);
 	const [folderName, setFolderName] = useState("");
 	const [courseContent, setCourseContent] = useState<
@@ -79,6 +80,7 @@ const useCreatorCourseComp = () => {
 
 		setCourseAtom(data.course);
 
+		setName(data.course.name);
 		setDesc(data.course.description);
 		setPrice(data.course.price);
 		setImageUrl(data.course.imageUrl);
@@ -164,7 +166,7 @@ const useCreatorCourseComp = () => {
 				data: { name: videoName, folderId: folderId },
 				withCredentials: true,
 			});
-			const { signedUrl, contentId } = postResponse.data;
+			const { signedUrl } = postResponse.data;
 
 			const s3Response = await axios({
 				method: "PUT",
@@ -173,13 +175,6 @@ const useCreatorCourseComp = () => {
 				headers: { "Content-Type": "video/mp4" },
 			});
 			if (s3Response.status !== 200) return;
-
-			const backendUpdateResponse = await axios({
-				method: "POST",
-				url: `${BACKEND_URL}/course/contentUploaded/${contentId}`,
-				withCredentials: true,
-			});
-			if (backendUpdateResponse.status !== 200) return;
 		} catch (err) {
 			console.log(err);
 		}
@@ -190,7 +185,36 @@ const useCreatorCourseComp = () => {
 		fetchCourse();
 	};
 
+	const handleDeleteVideo = async (contentId: string) => {
+		try {
+			await axios({
+				method: "DELETE",
+				url: `${BACKEND_URL}/course/content/${contentId}`,
+				withCredentials: true,
+			});
+
+			fetchCourse();
+		} catch (err) {
+			console.log(err);
+		}
+	};
+
+	const handleDeleteFolder = async (folderId: string) => {
+		try {
+			await axios({
+				method: "DELETE",
+				url: `${BACKEND_URL}/course/folder/${folderId}`,
+				withCredentials: true,
+			});
+
+			fetchCourse();
+		} catch (err) {
+			console.log(err);
+		}
+	};
+
 	return {
+		name,
 		desc,
 		price,
 		imageUrl,
@@ -200,6 +224,7 @@ const useCreatorCourseComp = () => {
 		setVideoName,
 		setVideo,
 		setFolderName,
+		navigate,
 		handleDescChange,
 		handlePriceChange,
 		handleImageUrlChange,
@@ -207,6 +232,8 @@ const useCreatorCourseComp = () => {
 		handleCourseDelete,
 		handleAddFolder,
 		handleVideoAdd,
+		handleDeleteVideo,
+		handleDeleteFolder,
 	};
 };
 

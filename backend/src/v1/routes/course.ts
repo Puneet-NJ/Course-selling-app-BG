@@ -10,7 +10,7 @@ import client from "../utils/prisma";
 import { v4 as uuidv4 } from "uuid";
 import {
 	getPresignedUrl,
-	deleteImageFromS3,
+	deleteS3,
 	getPresignedUrlTemp,
 	presignedUrlVideo,
 } from "../utils/aws";
@@ -40,12 +40,15 @@ courseRouter.post("/", auth(["Admin"]), async (req, res) => {
 			return;
 		}
 
-		const courseThumbnailId = `${name}/thumbnail`;
+		const courseId = uuidv4();
+
+		const courseThumbnailId = `${courseId}/thumbnail`;
 
 		const signedUrl = await getPresignedUrl(courseThumbnailId, "image/png");
 
 		const course = await client.courses.create({
 			data: {
+				id: courseId,
 				name,
 				description,
 				price,
@@ -143,7 +146,7 @@ courseRouter.put("/", auth(["Admin"]), async (req, res) => {
 	}
 });
 
-// Todo: Delete the videos from s3 aswell
+// Todo: Delete the videos from s3 aswell ✅
 courseRouter.delete("/:courseId", auth(["Admin"]), async (req, res) => {
 	try {
 		const courseId = req.params.courseId;
@@ -166,21 +169,21 @@ courseRouter.delete("/:courseId", auth(["Admin"]), async (req, res) => {
 			return;
 		}
 
-		const prevImageUrl = course.imageUrl.split(process.env.CDN_LINK as string);
-
 		const response = await client.courses.delete({
 			where: { id: courseId },
 		});
 
-		const prevImageKey = prevImageUrl[1].slice(1);
-		deleteImageFromS3(prevImageKey);
+		await deleteS3(courseId);
 
 		res.json({ msg: "Course deleted successfully" });
 	} catch (err) {
+		console.log(err);
+
 		res.status(500).json({ msg: "Internal server error" });
 	}
 });
 
+// GETS ALL THE INFO OF A COURSE
 courseRouter.get("/:courseId", async (req, res) => {
 	try {
 		const courseId = req.params.courseId;
@@ -203,6 +206,7 @@ courseRouter.get("/:courseId", async (req, res) => {
 	}
 });
 
+// GETS ALL THE CONTENT INFO ALONG WITH SIGNED URL
 courseRouter.get("/:courseId/:contentId", auth(["User"]), async (req, res) => {
 	try {
 		const { courseId, contentId } = req.params;
@@ -245,6 +249,7 @@ courseRouter.get("/:courseId/:contentId", auth(["User"]), async (req, res) => {
 	}
 });
 
+// GETS ALL THE COURSES
 courseRouter.get("/", async (req, res) => {
 	try {
 		const courses = await client.courses.findMany({});
@@ -345,7 +350,7 @@ courseRouter.post("/postContent", auth(["Admin"]), async (req, res) => {
 			},
 		});
 
-		res.json({ signedUrl, contentId: content.id });
+		res.json({ signedUrl });
 	} catch (err) {
 		res.status(500).json({ msg: "Internal Server Error" });
 	}
@@ -390,3 +395,93 @@ courseRouter.put(
 		}
 	}
 );
+
+// * Delete Endpoints
+
+// Delete a video
+courseRouter.delete(
+	"/content/:contentId",
+	auth(["Admin"]),
+	async (req, res) => {
+		try {
+			const userId = res.locals.Admin.id;
+			const { contentId } = req.params;
+
+			const content = await client.courseContent.findFirst({
+				where: {
+					id: contentId,
+				},
+				include: {
+					courseFolder: {
+						include: {
+							course: true,
+						},
+					},
+				},
+			});
+
+			if (!content) {
+				res.status(400).json({ msg: "Invalid Content Id" });
+				return;
+			}
+
+			const actualCreator = content.courseFolder.course.creatorId;
+			const contentKey = `${content.courseFolder.course.id}/${content?.courseFolderId}/${content?.id}`;
+
+			if (actualCreator !== userId) {
+				res.json({ msg: "You are not the creator of the course" });
+				return;
+			}
+
+			const response = await client.courseContent.delete({
+				where: { id: contentId },
+			});
+
+			await deleteS3(contentKey);
+
+			res.json({ msg: "Course Deleted Successfully" });
+		} catch (err) {
+			res.status(500).json({ msg: "Internal Server Error" });
+		}
+	}
+);
+
+// Delete a Folder
+courseRouter.delete("/folder/:folderId", auth(["Admin"]), async (req, res) => {
+	try {
+		const userId = res.locals.Admin.id;
+		const { folderId } = req.params;
+
+		const folder = await client.courseFolder.findFirst({
+			where: {
+				id: folderId,
+			},
+			include: { course: true },
+		});
+
+		if (!folder) {
+			res.status(400).json({ msg: "Invalid Folder Id" });
+			return;
+		}
+
+		const actualCreator = folder.course.creatorId;
+		const folderKey = `${folder.course.id}/${folder.id}`;
+
+		if (actualCreator !== userId) {
+			res.status(400).json({ msg: "Invalid Content Id" });
+			return;
+		}
+
+		const response = await client.courseFolder.delete({
+			where: {
+				id: folderId,
+			},
+		});
+
+		await deleteS3(folderKey);
+
+		res.json({ msg: "Folder deleted successfully" });
+	} catch (err) {
+		res.status(500).json({ msg: "Internal Server Error" });
+	}
+});

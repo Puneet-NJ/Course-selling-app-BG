@@ -1,13 +1,10 @@
-import { useRecoilValue } from "recoil";
 import useCreatorHome from "../Hooks/useCreatorHome";
-import { creatorAtom } from "../utils/atoms";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import { Button } from "./ui/button";
 import { CourseCard } from "./CourseCard";
 import { Link } from "react-router-dom";
-import { useMemo } from "react";
 
 const CreatorHomeComp = () => {
 	const {
@@ -17,13 +14,13 @@ const CreatorHomeComp = () => {
 		handleNameChange,
 		handlePriceChange,
 		handleCreateCourse,
+		courses,
+		creatorName,
+		currCourseCard,
 		name,
+		isMobile,
 		price,
 	} = useCreatorHome();
-	const { courses: creatorCourses, name: creatorName } =
-		useRecoilValue(creatorAtom);
-
-	const courses = useMemo(() => creatorCourses.slice(0, 3), [creatorCourses]);
 
 	return (
 		<div className="max-w-6xl mx-auto p-6 space-y-8">
@@ -55,21 +52,30 @@ const CreatorHomeComp = () => {
 						</CardContent>
 					</Card>
 				) : (
-					<div className="flex justify-between">
-						{courses.map((course) => (
-							<div
-								key={course.id}
-								className="hover:shadow-lg transition-shadow"
-							>
+					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+						{!isMobile ? (
+							courses.map((course) => (
+								<div key={course.id} className="">
+									<CourseCard
+										buttonText="Edit Course"
+										imageUrl={course.imageUrl}
+										price={course.price}
+										title={course.name}
+										to={`/creator/course/${course.id}`}
+									/>
+								</div>
+							))
+						) : (
+							<div className="mx-auto">
 								<CourseCard
 									buttonText="Edit Course"
-									imageUrl={course.imageUrl}
-									price={course.price}
-									title={course.name}
-									to={`/creator/course/${course.id}`}
+									imageUrl={courses[currCourseCard].imageUrl}
+									price={courses[currCourseCard].price}
+									title={courses[currCourseCard].name}
+									to={`/creator/course/${courses[currCourseCard].id}`}
 								/>
 							</div>
-						))}
+						)}
 					</div>
 				)}
 			</div>

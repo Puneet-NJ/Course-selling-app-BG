@@ -40,7 +40,7 @@ model Courses {
   isUploaded Boolean @default(true)
 
   creatorId String
-  creator Course_Creator @relation(fields: [creatorId], references: [id])
+  creator Course_Creator @relation(fields: [creatorId], references: [id], onDelete: Cascade)
 
   purchases Purchases[]
 
@@ -52,7 +52,7 @@ model CourseFolder {
   name String 
 
   courseId String 
-  course Courses @relation(fields: [courseId], references: [id])
+  course Courses @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   @@unique([courseId, name])
 
@@ -64,7 +64,7 @@ model CourseContent {
   name String 
 
   courseFolderId String
-  courseFolder CourseFolder @relation(fields: [courseFolderId], references: [id])
+  courseFolder CourseFolder @relation(fields: [courseFolderId], references: [id], onDelete: Cascade)
 
   status ContentStatus @default(PENDING)
 

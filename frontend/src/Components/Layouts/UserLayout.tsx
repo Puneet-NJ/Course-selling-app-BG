@@ -13,10 +13,11 @@ import {
 } from "../../utils/Icons";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { BACKEND_URL, PLAYSTORE_URL } from "../../utils/lib";
-import { useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { useRecoilState } from "recoil";
 import { userTokenPresentAtom } from "@/utils/atoms";
+import { MenuIcon } from "lucide-react";
 
 export const SIDEBAR_OPTIONS = [
 	{ name: "Home", to: "/", icon: <Home /> },
@@ -26,11 +27,12 @@ export const SIDEBAR_OPTIONS = [
 	{ name: "Logout", to: "/signin", icon: <Logout /> },
 	{ name: "Login", to: "/signin", icon: <Login /> },
 ];
-
 const UserLayout = ({ children }: { children: React.ReactNode }) => {
 	const navigate = useNavigate();
 	const [isFound, setIsFound] = useRecoilState(userTokenPresentAtom);
 	const location = useLocation();
+	const [screenSize, setScreenSize] = useState(innerWidth);
+	const [isMenuBarOpen, setIsMenuBarOpen] = useState(false);
 
 	const path = location.pathname;
 
@@ -50,8 +52,6 @@ const UserLayout = ({ children }: { children: React.ReactNode }) => {
 			url: `${BACKEND_URL}/isLoggedIn`,
 			withCredentials: true,
 		}).then((response) => {
-			console.log(response.data.loggedIn);
-
 			if (response.data.loggedIn && response.data.role === "user") {
 				setIsFound(true);
 			} else {
@@ -62,9 +62,29 @@ const UserLayout = ({ children }: { children: React.ReactNode }) => {
 				}
 			}
 		});
+
+		window.addEventListener("resize", () => {
+			setScreenSize(innerWidth);
+		});
+
+		return () => {
+			window.removeEventListener("resize", () => {
+				setScreenSize(innerWidth);
+			});
+		};
 	}, [path]);
 
-	console.log(isFound);
+	const isMobile = useMemo(() => {
+		if (screenSize < 640) {
+			setIsMenuBarOpen(false);
+			return true;
+		} else {
+			setIsMenuBarOpen(true);
+			return false;
+		}
+	}, [screenSize]);
+
+	console.log(screenSize);
 
 	return (
 		<div
@@ -75,9 +95,21 @@ const UserLayout = ({ children }: { children: React.ReactNode }) => {
 			} flex flex-col`}
 		>
 			<nav className="flex justify-between items-center px-[5%] py-2 shadow-lg sticky top-0 bg-white z-20">
-				<Link to={"/"} className="w-12">
-					<Logo />
-				</Link>
+				<div className="w-24 flex items-center justify-between">
+					{isMobile && (
+						<span
+							onClick={() => {
+								setIsMenuBarOpen((prev) => !prev);
+							}}
+						>
+							<MenuIcon />
+						</span>
+					)}
+
+					<Link to={"/"} className="w-12">
+						<Logo />
+					</Link>
+				</div>
 
 				<div>
 					<div className="flex items-center gap-6">
@@ -90,16 +122,26 @@ const UserLayout = ({ children }: { children: React.ReactNode }) => {
 
 			<div className="flex flex-1">
 				{path !== "/signup" && path !== "/signin" && (
-					<aside className="bg-slate-200 w-1/5 px-20 py-[2%] text-sm sticky top-16 h-[calc(100vh-40px)] shadow-lg">
+					<aside
+						className={`bg-slate-200 w-3/5 sm:w-1/5 py-8 ${
+							isMobile ? "px-10" : "px-[5%]"
+						} py-[2%] shadow-lg transition-transform duration-300 text-xs sm:text-sm ${
+							isMenuBarOpen ? "translate-x-0" : "-translate-x-full"
+						} ${
+							isMobile
+								? "fixed left-0 top-16 h-[calc(100vh-4rem)] z-10"
+								: "sticky top-16 h-[calc(100vh-40px)]"
+						}`}
+					>
 						<h4 className="font-semibold text-gray-600">MAIN MENU</h4>
 						<ul className="mt-[30%] space-y-9">
 							{SIDEBAR_OPTIONS.map((option) => {
-								if (isFound && option.name === "Login") return;
-								if (!isFound && option.name === "Logout") return;
+								if (isFound && option.name === "Login") return null;
+								if (!isFound && option.name === "Logout") return null;
 
 								if (!isFound) {
 									if (option.name === "Purchases" || option.name === "Settings")
-										return;
+										return null;
 								}
 
 								return (
@@ -146,8 +188,8 @@ const UserLayout = ({ children }: { children: React.ReactNode }) => {
 					</div>
 
 					{path !== "/signup" && path !== "/signin" && (
-						<footer className="bg-slate-200 flex justify-between text-sm p-10 rounded-t-lg shadow-xl">
-							<div className="w-20">
+						<footer className="bg-slate-200 flex justify-between text-sm p-10 rounded-t-lg shadow-xl flex-col sm:flex-row gap-12">
+							<div className="w-20 rounded-full">
 								<Logo />
 							</div>
 

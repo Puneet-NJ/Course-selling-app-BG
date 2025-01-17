@@ -10,10 +10,11 @@ import {
 	AccordionItem,
 	AccordionTrigger,
 } from "./ui/accordion";
-import { Plus, Video, Folder } from "lucide-react";
+import { Plus, Video, Folder, ArrowLeftCircleIcon } from "lucide-react";
 
 const CreatorCourseComp = () => {
 	const {
+		name,
 		desc,
 		price,
 		folderName,
@@ -22,6 +23,7 @@ const CreatorCourseComp = () => {
 		setVideoName,
 		setVideo,
 		setFolderName,
+		navigate,
 		handleDescChange,
 		handleImageUrlChange,
 		handlePriceChange,
@@ -29,14 +31,27 @@ const CreatorCourseComp = () => {
 		handleCourseDelete,
 		handleAddFolder,
 		handleVideoAdd,
+		handleDeleteVideo,
+		handleDeleteFolder,
 	} = useCreatorCourseComp();
 
 	return (
-		<div className="max-w-6xl mx-auto my-8 space-y-20">
-			<Card className="">
+		<div className="max-w-6xl px-10 mx-auto my-8 space-y">
+			<Button
+				className="bg-gray-800 text-white rounded-full mb-10"
+				onClick={() => {
+					navigate(-1);
+				}}
+			>
+				<ArrowLeftCircleIcon /> Go Back
+			</Button>
+
+			<Card className="mb-20">
 				<CardHeader className="">
 					<CardTitle className="px-2 text-2xl flex justify-between">
-						<span>Edit This Course</span>{" "}
+						<span>
+							Edit <span className="text-gray-600 border-b">{name}</span>
+						</span>{" "}
 						<button
 							onClick={handleCourseDelete}
 							className="p-2 rounded-full hover:text-red-500 hover:bg-black duration-150"
@@ -95,9 +110,9 @@ const CreatorCourseComp = () => {
 
 			<Card>
 				<CardHeader>
-					<CardTitle className="px-2 text-2xl flex justify-between">
+					<CardTitle className="px-2 text-2xl flex justify-between border-b pb-3">
 						<span>Course Content</span>{" "}
-						<div className="flex gap-5">
+						<div className="flex sm:flex-row flex-col gap-5">
 							<Input
 								placeholder="Folder-1"
 								value={folderName}
@@ -132,9 +147,22 @@ const CreatorCourseComp = () => {
 								className="border rounded-lg bg-white shadow-sm"
 							>
 								<AccordionTrigger className="px-4 py-3 hover:no-underline">
-									<div className="flex items-center gap-3">
+									<div className="w-full flex items-center gap-3">
 										<Folder className="h-5 w-5 text-blue-600" />
-										<span className="text-lg font-semibold">{folder.name}</span>
+
+										<div className="w-full flex justify-between items-center">
+											<span className="text-lg font-semibold">
+												{folder.name}
+											</span>
+
+											<Button
+												className="text font-semibold hover:text-red-600"
+												variant={"link"}
+												onClick={() => handleDeleteFolder(folder.id)}
+											>
+												Delete Folder
+											</Button>
+										</div>
 									</div>
 								</AccordionTrigger>
 
@@ -145,32 +173,47 @@ const CreatorCourseComp = () => {
 												key={content.id}
 												className="flex items-center justify-between p-3 rounded-md bg-gray-100 hover:bg-gray-100 transition-colors"
 											>
-												<div className="flex items-center gap-3">
+												<div className="w-full flex justify-between items-center gap-3">
 													<Video className="h-4 w-4 text-gray-600" />
-													<span className="font-medium">{content.name}</span>
+
+													<div className="w-full flex justify-between items-center">
+														<span className="font-medium">{content.name}</span>
+
+														<span>
+															<Button
+																className="text-xs font-semibold hover:text-red-600"
+																variant={"link"}
+																onClick={() => handleDeleteVideo(content.id)}
+															>
+																Delete Video
+															</Button>
+														</span>
+													</div>
 												</div>
 											</div>
 										))}
 
 										<div className="flex items-center gap-5">
-											<Input
-												value={videoName?.get(index)}
-												onChange={(e) => {
-													setVideoName((prev) => {
-														return prev?.set(index, e.target.value);
-													});
-												}}
-												placeholder="Video-1"
-											/>
-											<Input
-												type="file"
-												accept="video/mp4"
-												onChange={(e) => {
-													if (!e.target.files?.[0]) return;
+											<div className="flex flex-col sm:flex-row gap-3">
+												<Input
+													value={videoName?.get(index)}
+													onChange={(e) => {
+														setVideoName((prev) => {
+															return prev?.set(index, e.target.value);
+														});
+													}}
+													placeholder="Video-1"
+												/>
+												<Input
+													type="file"
+													accept="video/mp4"
+													onChange={(e) => {
+														if (!e.target.files?.[0]) return;
 
-													setVideo(e.target.files[0]);
-												}}
-											/>
+														setVideo(e.target.files[0]);
+													}}
+												/>
+											</div>
 											<Button
 												className="flex items-center justify-center gap-2"
 												onClick={() => {

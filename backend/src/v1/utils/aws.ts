@@ -17,8 +17,6 @@ const initilizeAws = () => {
 		signatureVersion: "v4",
 		region: "ap-south-1",
 	});
-
-	return s3;
 };
 
 export const getPresignedUrl = (objectKey: string, contentType: string) => {
@@ -43,18 +41,49 @@ export const getPresignedUrlTemp = (objectKey: string, contentType: string) => {
 	});
 };
 
-export const deleteImageFromS3 = (prevImageKey: string) => {
-	initilizeAws();
+export const deleteS3 = async (toDeleteKey: string) => {
+	try {
+		initilizeAws();
 
-	s3.deleteObject(
-		{ Bucket: "puneet-course-app", Key: prevImageKey },
-		function (err, data) {
-			if (err) {
-				console.log(err);
-				return;
+		let isTruncated = true;
+		let continuationToken = null;
+		const prefix = `${toDeleteKey}/`; // Folder prefix for the courseId
+
+		// Loop to handle pagination when there are many objects
+		while (isTruncated) {
+			const listParams = {
+				Bucket: "puneet-course-app",
+				Prefix: prefix, // e.g. 'courseId/' to delete all files and subfolders
+				ContinuationToken: continuationToken, // For paginated results
+			};
+
+			const listedObjects: any = await s3.listObjectsV2(listParams).promise();
+
+			// If objects are found, delete them
+			if (listedObjects.Contents.length > 0) {
+				const deleteParams = {
+					Bucket: "puneet-course-app",
+					Delete: {
+						Objects: listedObjects.Contents.map((object: any) => ({
+							Key: object.Key,
+						})),
+					},
+				};
+
+				// Delete the objects
+				await s3.deleteObjects(deleteParams).promise();
+				console.log(`Deleted objects in ${prefix}`);
 			}
+
+			// Check if the result is truncated (there are more objects to list)
+			isTruncated = listedObjects.IsTruncated;
+			continuationToken = listedObjects.NextContinuationToken;
 		}
-	);
+
+		console.log(`Successfully deleted all content in ${toDeleteKey}`);
+	} catch (error) {
+		console.error("Error deleting course content:", error);
+	}
 };
 
 export const presignedUrlVideo = (objectKey: string) => {

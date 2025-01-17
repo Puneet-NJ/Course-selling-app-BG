@@ -109,14 +109,12 @@ userRouter.get("/purchases", auth(["User"]), async (req, res) => {
 		const allPurchases = await client.purchases.findMany({
 			where: { userId: id },
 		});
-		console.log(allPurchases);
 
 		const courseIds = allPurchases.map((purchased) => purchased.courseId);
 
 		const purchases = await client.courses.findMany({
 			where: { id: { in: courseIds } },
 		});
-		console.log(purchases);
 
 		res.json({ purchases: purchases });
 	} catch (err) {
