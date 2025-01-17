@@ -3,7 +3,7 @@ import { getSignedUrl } from "aws-cloudfront-sign";
 
 let s3: AWS.S3;
 
-console.log(process.env.CF_PRIVATE_KEY);
+console.log(process.env);
 const privatekey = process.env.CF_PRIVATE_KEY as string;
 
 const cfSigningParams = {
