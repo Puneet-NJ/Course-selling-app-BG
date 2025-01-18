@@ -28,10 +28,6 @@ const UserHomeComp = () => {
 		return <div>Error loading courses</div>;
 	}
 
-	if (courses.length === 0) {
-		return <div>No courses available</div>;
-	}
-
 	return (
 		<div className="flex flex-col gap-12">
 			<div>
@@ -62,7 +58,9 @@ const UserHomeComp = () => {
 				<h3 className="h3 text-2xl sm:text-3xl font-semibold text-center">
 					Featured
 				</h3>
-				{!isMobile ? (
+				{courses.length === 0 ? (
+					<div className="text-sm font-bold">No courses available</div>
+				) : !isMobile ? (
 					<CourseCardDisplay courses={courses} />
 				) : (
 					<CourseCard

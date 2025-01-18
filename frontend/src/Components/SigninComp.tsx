@@ -28,10 +28,26 @@ const SigninComp = () => {
 			);
 
 			if (response.status === 200) {
-				navigate(userKind === "user" ? "/" : "/creator/");
+				navigate(userKind === "user" ? "/" : "/creator");
 			}
 		} catch (error) {
 			console.error("Error signing in:", error);
+		}
+	};
+
+	const handleGuestLogin = async (role: "student" | "creator") => {
+		try {
+			const response = await axios({
+				method: "POST",
+				url: `${BACKEND_URL}/guestLogin/${role}`,
+				withCredentials: true,
+			});
+
+			if (response.status === 200) {
+				navigate(role === "student" ? "/" : "/creator");
+			}
+		} catch (err) {
+			console.log(err);
 		}
 	};
 
@@ -86,13 +102,35 @@ const SigninComp = () => {
 						Sign In
 					</Button>
 
-					<p className="text-center text-sm font-medium">
+					<p className="text-center text-sm font-medium border-b border-black py-3">
 						Haven't Signed Up?{" "}
 						<Link to="/signup" className="text-indigo-600 hover:underline">
 							Sign Up
 						</Link>
 					</p>
 				</form>
+
+				<div className="hover:text-black flex flex-col sm:flex-row">
+					<Button
+						variant={"link"}
+						className="text-gray-700 hover:text-black font-semibold"
+						onClick={() => {
+							handleGuestLogin("student");
+						}}
+					>
+						Guest login as a Student
+					</Button>
+
+					<Button
+						variant={"link"}
+						className="text-gray-700 hover:text-black font-semibold"
+						onClick={() => {
+							handleGuestLogin("creator");
+						}}
+					>
+						Guest login as a Teacher
+					</Button>
+				</div>
 			</CardContent>
 		</Card>
 	);

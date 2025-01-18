@@ -31,7 +31,6 @@ const main = async () => {
 			videoPath,
 			videoContentPath
 		);
-		console.log(res);
 
 		// transcode the video
 		await transcodeVideo(videoPath, videoContentPath);
@@ -221,8 +220,6 @@ const updateBackend = async (contentId: string) => {
 			method: "PUT",
 			url: `${process.env.BACKEND_URL}/course/contentUploaded/${contentId}`,
 		});
-
-		console.log(response.data);
 	} catch (err) {
 		console.log(err);
 	}

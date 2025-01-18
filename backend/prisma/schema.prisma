@@ -78,7 +78,7 @@ model Purchases {
   user User @relation(references: [id], fields: [userId])
 
   courseId  String
-  Course Courses @relation(fields: [courseId], references: [id])
+  Course Courses @relation(fields: [courseId], references: [id], onDelete: Cascade)
 }
 
 enum ContentStatus {

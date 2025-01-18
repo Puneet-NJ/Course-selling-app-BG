@@ -97,7 +97,7 @@ const useCreatorHome = () => {
 
 		const currCourseInterval = setInterval(() => {
 			setCurrCourseCard((prev) => {
-				if (prev === 2) return 0;
+				if (courses.length === 0 || prev === courses.length - 1) return 0;
 
 				return prev + 1;
 			});

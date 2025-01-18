@@ -11,6 +11,7 @@ import CreatorCourse from "./Pages/CreatorCourse";
 import CreatorCourses from "./Pages/CreatorCourses";
 import PurchasedCourseContent from "./Pages/PurchasedCourseContent";
 import Content from "./Pages/Content";
+import Settings from "./Pages/Settings";
 
 function App() {
 	return (
@@ -24,6 +25,7 @@ function App() {
 						<Route path="/signup" element={<Signup />} />
 						<Route path="/signin" element={<Signin />} />
 						<Route path="/course/:courseId" element={<Course />} />
+						<Route path="/settings" element={<Settings />} />
 						<Route
 							path="/purchased/:courseId"
 							element={<PurchasedCourseContent />}

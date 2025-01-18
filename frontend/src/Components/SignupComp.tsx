@@ -30,7 +30,7 @@ const SignupComp = () => {
 			);
 
 			if (response.status === 200) {
-				navigate(userKind === "user" ? "/" : "/creator/");
+				navigate(userKind === "user" ? "/" : "/creator");
 			}
 		} catch (error) {
 			console.error("Error signing up:", error);

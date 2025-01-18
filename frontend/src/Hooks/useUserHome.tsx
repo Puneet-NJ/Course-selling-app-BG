@@ -35,20 +35,15 @@ const useUserHome = () => {
 			return;
 		}
 
-		console.log("Setting up intervals - isMobile:", isMobile);
-
-		// Image rotation interval
 		const imageIntervalId = setInterval(() => {
 			setCurrImage((prev) =>
 				prev === imageArray.current.length - 1 ? 0 : prev + 1
 			);
 		}, 3000);
 
-		// Course rotation interval (mobile only)
 		let courseIntervalId: NodeJS.Timeout | undefined;
 
 		if (isMobile && topCourses.length > 1) {
-			console.log("Setting up mobile course interval");
 			courseIntervalId = setInterval(() => {
 				setCurrCourse((prev) =>
 					prev === topCourses.length - 1 ? 0 : prev + 1
@@ -56,7 +51,6 @@ const useUserHome = () => {
 			}, 2000);
 		}
 
-		// Resize handler
 		const handleResize = () => {
 			const newSize = window.innerWidth;
 			setScreenSize(newSize);
@@ -65,7 +59,6 @@ const useUserHome = () => {
 		window.addEventListener("resize", handleResize);
 
 		return () => {
-			console.log("Cleaning up intervals");
 			clearInterval(imageIntervalId);
 			if (courseIntervalId) {
 				clearInterval(courseIntervalId);

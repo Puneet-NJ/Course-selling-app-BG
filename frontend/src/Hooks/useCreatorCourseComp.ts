@@ -154,8 +154,6 @@ const useCreatorCourseComp = () => {
 		videoName: string | undefined,
 		folderId: string
 	) => {
-		console.log(videoName, folderId);
-
 		if (!videoName || videoName === "" || video === null) return;
 
 		try {
@@ -198,7 +196,7 @@ const useCreatorCourseComp = () => {
 		}
 	};
 
-	const handleDeleteFolder = async (folderId: string) => {
+	const handleDeleteFolder = async (folderId: string, index: number) => {
 		try {
 			await axios({
 				method: "DELETE",
@@ -207,6 +205,11 @@ const useCreatorCourseComp = () => {
 			});
 
 			fetchCourse();
+
+			const newMap = new Map(videoName);
+			newMap.delete(index);
+
+			setVideoName(newMap);
 		} catch (err) {
 			console.log(err);
 		}

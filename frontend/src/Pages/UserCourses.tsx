@@ -12,7 +12,13 @@ const UserCourses = () => {
 			<h2 className="h3 text-3xl font-semibold text-center">Courses</h2>
 
 			<div className="">
-				<CourseCardDisplay courses={courses} />
+				{courses.length === 0 ? (
+					<div className="text-sm font-bold text-center">
+						No courses available
+					</div>
+				) : (
+					<CourseCardDisplay courses={courses} />
+				)}
 			</div>
 		</div>
 	);

@@ -21,7 +21,7 @@ const CreatorLayout = ({ children }: { children: React.ReactNode }) => {
 	return (
 		<div>
 			<nav className="flex justify-between items-center px-[5%] py-2 shadow-lg sticky top-0 bg-white z-20">
-				<Link to={"/creator/"} className="w-12">
+				<Link to={"/creator"} className="w-12">
 					<Logo />
 				</Link>
 

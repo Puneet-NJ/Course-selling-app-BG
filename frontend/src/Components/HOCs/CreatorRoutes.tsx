@@ -12,13 +12,17 @@ const CreatorRoutes = ({ children }: { children: React.ReactNode }) => {
 			method: "GET",
 			url: `${BACKEND_URL}/isLoggedIn`,
 			withCredentials: true,
-		}).then((response) => {
-			if (response.data.loggedIn && response.data.role === "creator") {
-				setIsCreator(true);
-			} else {
-				navigate("/signin");
-			}
-		});
+		})
+			.then((response) => {
+				if (response.data.loggedIn && response.data.role === "creator") {
+					setIsCreator(true);
+				} else {
+					navigate("/signin");
+				}
+			})
+			.catch((err) => {
+				console.log(err);
+			});
 	}, []);
 
 	if (!isCreator) {

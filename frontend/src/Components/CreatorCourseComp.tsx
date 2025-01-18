@@ -158,7 +158,7 @@ const CreatorCourseComp = () => {
 											<Button
 												className="text font-semibold hover:text-red-600"
 												variant={"link"}
-												onClick={() => handleDeleteFolder(folder.id)}
+												onClick={() => handleDeleteFolder(folder.id, index)}
 											>
 												Delete Folder
 											</Button>

@@ -21,7 +21,6 @@ const useFetchCourses = () => {
 	});
 
 	useEffect(() => {
-		console.log("Fetching courses...");
 		mutation.mutate();
 	}, []);
 

@@ -8,8 +8,6 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 	const isCreator =
 		location.pathname.slice(1, 1 + 7) === "creator" ? true : false;
 
-	console.log(location);
-
 	return (
 		<>
 			{isCreator ? (

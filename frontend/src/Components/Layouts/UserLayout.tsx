@@ -84,8 +84,6 @@ const UserLayout = ({ children }: { children: React.ReactNode }) => {
 		}
 	}, [screenSize]);
 
-	console.log(screenSize);
-
 	return (
 		<div
 			className={`w-screen ${

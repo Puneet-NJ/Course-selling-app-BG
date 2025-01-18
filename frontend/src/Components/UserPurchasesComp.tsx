@@ -12,11 +12,17 @@ const UserPurchasesComp = () => {
 			<h2 className="h3 text-3xl font-semibold text-center">Purchases</h2>
 
 			<div>
-				<CourseCardDisplay
-					courses={purchasedCourses}
-					buttonText="View Content"
-					to="purchasedPage"
-				/>
+				{purchasedCourses.length === 0 ? (
+					<div className="text-sm font-bold text-center">
+						You haven't purchased any courses
+					</div>
+				) : (
+					<CourseCardDisplay
+						courses={purchasedCourses}
+						buttonText="View Content"
+						to="purchasedPage"
+					/>
+				)}
 			</div>
 		</div>
 	);
