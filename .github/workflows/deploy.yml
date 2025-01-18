@@ -29,7 +29,8 @@ jobs:
           push: true
           tags: puneetnj/course-app-be:latest
           platforms: linux/amd64,linux/arm64
-          no-cache: true
+          cache-from: type=registry,ref=puneetnj/course-app-be:latest
+          cache-to: type=inline,mode=max
           build-args: |
             DATABASE_URL=${{ secrets.DATABASE_URL }}
             USER_JWT_PASSWORD=${{ secrets.USER_JWT_PASSWORD }}
@@ -52,14 +53,18 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           script: |
+            # Store keys in variables with proper escaping
+            CF_PUBLIC=$(echo '${{ secrets.CF_PUBLIC_KEY }}' | sed 's/\\n/\n/g')
+            CF_PRIVATE=$(echo '${{ secrets.CF_PRIVATE_KEY }}' | sed 's/\\n/\n/g')
+
             sudo docker pull puneetnj/course-app-be:latest
             if [ "$(sudo docker ps -aq -f name=course-app-be)" ]; then
               sudo docker stop course-app-be
               sudo docker rm course-app-be
             fi
             sudo docker run -d --name course-app-be -p 4000:4000 \
-              -e CF_PUBLIC_KEY=${{ secrets.CF_PUBLIC_KEY }} \
-              -e CF_PRIVATE_KEY=${{ secrets.CF_PRIVATE_KEY }} \
+              -e CF_PUBLIC_KEY="$CF_PUBLIC" \
+              -e CF_PRIVATE_KEY="$CF_PRIVATE" \
               puneetnj/course-app-be:latest
 
       - name: Setup Node.js
