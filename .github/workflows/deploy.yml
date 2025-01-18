@@ -77,9 +77,9 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            # Stop any running worker process
-            if pgrep -f "npm run start" > /dev/null; then
-              pkill -f "npm run start"
+            # Install PM2 if not already installed
+            if ! command -v pm2 &> /dev/null; then
+              npm install -g pm2
             fi
 
             # Clean and setup worker directory
@@ -87,7 +87,7 @@ jobs:
             rm -rf worker || true
             mkdir -p worker
 
-            # Copy worker files from root directory
+            # Copy worker files
             cp -r ./worker/* ./worker/
             cd worker
 
@@ -103,10 +103,18 @@ jobs:
             AWS_S3_BUCKET_TEMP=${{ secrets.AWS_S3_BUCKET_TEMP }}
             EOL
 
-            # Install dependencies and start worker
+            # Install dependencies and build
             npm install
             npm run build
-            npm run start &
+
+            # Stop existing PM2 process if exists
+            pm2 delete worker || true
+
+            # Start with PM2
+            pm2 start npm --name "worker" -- run start
+
+            # Save PM2 process list
+            pm2 save
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
