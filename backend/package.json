@@ -33,6 +33,7 @@
 		"express": "^4.21.2",
 		"jsonwebtoken": "^9.0.2",
 		"nodemon": "^3.1.9",
+		"pm2": "^5.4.3",
 		"pre-commit": "^1.2.2",
 		"rimraf": "^5.0.10",
 		"ts-node": "^10.9.2",
