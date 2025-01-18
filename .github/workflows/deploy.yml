@@ -76,6 +76,8 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
+          source: "worker/*" # Add this line
+          target: "/home/${{ secrets.SSH_USERNAME }}" # Add this line
           script: |
             # Install PM2 if not already installed
             if ! command -v pm2 &> /dev/null; then
@@ -84,11 +86,12 @@ jobs:
 
             # Clean and setup worker directory
             cd /home/${{ secrets.SSH_USERNAME }}
-            rm -rf worker || true
+            rm -rf worker-temp || true
+            mv worker worker-temp || true  # Temporarily move existing worker dir
             mkdir -p worker
+            cp -r worker-temp/* worker/ || true  # Copy any existing files
+            rm -rf worker-temp || true
 
-            # Copy worker files
-            cp -r ./worker/* ./worker/
             cd worker
 
             # Set environment variables
