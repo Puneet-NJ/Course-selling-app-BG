@@ -79,8 +79,14 @@ const getVideo = async (
 		console.log(err);
 	}
 };
+
 const transcodeVideo = async (videoPath: string, videoContentPath: string) => {
 	try {
+		const videosFolderPath = path.join(__dirname, "..", "videos");
+		if (!fs.existsSync(videosFolderPath)) {
+			fs.mkdirSync(videosFolderPath);
+		}
+
 		const quality360 = path.join(videoPath, "360p");
 		const quality480 = path.join(videoPath, "480p");
 		const quality720 = path.join(videoPath, "720p");

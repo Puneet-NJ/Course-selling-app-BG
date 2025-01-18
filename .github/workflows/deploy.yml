@@ -46,7 +46,6 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            # Store keys in variables with proper escaping
             CF_PUBLIC=$(echo '${{ secrets.CF_PUBLIC_KEY }}' | sed 's/\\n/\n/g')
             CF_PRIVATE=$(echo '${{ secrets.CF_PRIVATE_KEY }}' | sed 's/\\n/\n/g')
 
@@ -64,6 +63,46 @@ jobs:
               -e CF_PUBLIC_KEY="$CF_PUBLIC" \
               -e CF_PRIVATE_KEY="$CF_PRIVATE" \
               puneetnj/course-app-be:latest
+
+  deploy-worker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Out Repo
+        uses: actions/checkout@v4
+
+      - name: Deploy Worker to EC2
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd /home/${{ secrets.SSH_USERNAME }}/
+
+            if [ -d "worker" ]; then
+              rm -rf worker
+            fi
+
+            mkdir worker && cd worker
+
+            echo "Transferring worker files..."
+            scp -r ./worker/* ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:/home/${{ secrets.SSH_USERNAME }}/worker
+            cd /home/${{ secrets.SSH_USERNAME }}/worker
+
+            echo "Setting environment variables..."
+            echo "REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}" >> .env
+            echo "REDIS_HOST=${{ secrets.REDIS_HOST }}" >> .env
+            echo "S3=${{ secrets.S3 }}" >> .env
+            echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> .env
+            echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> .env
+            echo "BACKEND_URL=${{ secrets.BACKEND_URL }}" >> .env
+            echo "AWS_S3_BUCKET=${{ secrets.AWS_S3_BUCKET }}" >> .env
+            echo "AWS_S3_BUCKET_TEMP=${{ secrets.AWS_S3_BUCKET_TEMP }}" >> .env
+
+            echo "Installing dependencies and starting worker..."
+            npm install
+            npm run build
+            npm run start
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
