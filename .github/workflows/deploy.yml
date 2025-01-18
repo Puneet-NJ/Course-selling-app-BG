@@ -29,8 +29,7 @@ jobs:
           push: true
           tags: puneetnj/course-app-be:latest
           platforms: linux/amd64,linux/arm64
-          cache-from: type=registry,ref=puneetnj/course-app-be:latest
-          cache-to: type=inline
+          no-cache: true
           build-args: |
             DATABASE_URL=${{ secrets.DATABASE_URL }}
             USER_JWT_PASSWORD=${{ secrets.USER_JWT_PASSWORD }}
