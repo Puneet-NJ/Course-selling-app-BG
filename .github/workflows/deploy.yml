@@ -70,29 +70,29 @@ jobs:
       - name: Check Out Repo
         uses: actions/checkout@v4
 
+      - name: Create SSH key file
+        run: |
+          mkdir -p ~/.ssh/
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+
+      - name: Copy worker files to EC2
+        run: |
+          scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -r ./worker/* ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:/home/${{ secrets.SSH_USERNAME }}/worker/
+
       - name: Deploy Worker to EC2
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
-          source: "worker/*" # Add this line
-          target: "/home/${{ secrets.SSH_USERNAME }}" # Add this line
           script: |
             # Install PM2 if not already installed
             if ! command -v pm2 &> /dev/null; then
               npm install -g pm2
             fi
 
-            # Clean and setup worker directory
-            cd /home/${{ secrets.SSH_USERNAME }}
-            rm -rf worker-temp || true
-            mv worker worker-temp || true  # Temporarily move existing worker dir
-            mkdir -p worker
-            cp -r worker-temp/* worker/ || true  # Copy any existing files
-            rm -rf worker-temp || true
-
-            cd worker
+            cd /home/${{ secrets.SSH_USERNAME }}/worker
 
             # Set environment variables
             cat > .env << EOL
