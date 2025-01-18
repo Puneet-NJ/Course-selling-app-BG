@@ -75,7 +75,6 @@ const useCreatorCourseComp = () => {
 
 		const data = response.data;
 
-		console.log(data.course.courseFolders);
 		setCourseContent(data.course.courseFolders);
 
 		setCourseAtom(data.course);
