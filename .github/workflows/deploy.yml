@@ -53,9 +53,14 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script: |
             sudo docker pull puneetnj/course-app-be:latest
-            sudo docker stop course-app-be || true
-            sudo docker rm course-app-be || true
-            sudo docker run -d --name course-app-be -p 4000:4000 -e CF_PUBLIC_KEY=${{ secrets.CF_PUBLIC_KEY }} -e CF_PRIVATE_KEY=${{ secrets.CF_PRIVATE_KEY }} puneetnj/course-app-be:latest
+            if [ "$(sudo docker ps -aq -f name=course-app-be)" ]; then
+              sudo docker stop course-app-be
+              sudo docker rm course-app-be
+            fi
+            sudo docker run -d --name course-app-be -p 4000:4000 \
+              -e CF_PUBLIC_KEY=${{ secrets.CF_PUBLIC_KEY }} \
+              -e CF_PRIVATE_KEY=${{ secrets.CF_PRIVATE_KEY }} \
+              puneetnj/course-app-be:latest
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
