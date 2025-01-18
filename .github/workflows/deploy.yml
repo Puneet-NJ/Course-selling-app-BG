@@ -77,32 +77,36 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            cd /home/${{ secrets.SSH_USERNAME }}/
-
-            if [ -d "worker" ]; then
-              rm -rf worker
+            # Stop any running worker process
+            if pgrep -f "npm run start" > /dev/null; then
+              pkill -f "npm run start"
             fi
 
-            mkdir worker && cd worker
+            # Clean and setup worker directory
+            cd /home/${{ secrets.SSH_USERNAME }}
+            rm -rf worker || true
+            mkdir -p worker
 
-            echo "Transferring worker files..."
-            scp -r ./worker/* ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:/home/${{ secrets.SSH_USERNAME }}/worker
-            cd /home/${{ secrets.SSH_USERNAME }}/worker
+            # Copy worker files from root directory
+            cp -r ./worker/* ./worker/
+            cd worker
 
-            echo "Setting environment variables..."
-            echo "REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}" >> .env
-            echo "REDIS_HOST=${{ secrets.REDIS_HOST }}" >> .env
-            echo "S3=${{ secrets.S3 }}" >> .env
-            echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> .env
-            echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> .env
-            echo "BACKEND_URL=${{ secrets.BACKEND_URL }}" >> .env
-            echo "AWS_S3_BUCKET=${{ secrets.AWS_S3_BUCKET }}" >> .env
-            echo "AWS_S3_BUCKET_TEMP=${{ secrets.AWS_S3_BUCKET_TEMP }}" >> .env
+            # Set environment variables
+            cat > .env << EOL
+            REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
+            REDIS_HOST=${{ secrets.REDIS_HOST }}
+            S3=${{ secrets.S3 }}
+            AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+            AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            BACKEND_URL=${{ secrets.BACKEND_URL }}
+            AWS_S3_BUCKET=${{ secrets.AWS_S3_BUCKET }}
+            AWS_S3_BUCKET_TEMP=${{ secrets.AWS_S3_BUCKET_TEMP }}
+            EOL
 
-            echo "Installing dependencies and starting worker..."
+            # Install dependencies and start worker
             npm install
             npm run build
-            npm run start
+            npm run start &
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
