@@ -55,7 +55,7 @@ jobs:
             sudo docker pull puneetnj/course-app-be:latest
             sudo docker stop course-app-be || true
             sudo docker rm course-app-be || true
-            sudo docker run -d --name course-app-be -p 4000:4000 puneetnj/course-app-be:latest
+            sudo docker run -d --name course-app-be -p 4000:4000 -e CF_PUBLIC_KEY=${{ secrets.CF_PUBLIC_KEY }} -e CF_PRIVATE_KEY=${{ secrets.CF_PRIVATE_KEY }} puneetnj/course-app-be:latest
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
