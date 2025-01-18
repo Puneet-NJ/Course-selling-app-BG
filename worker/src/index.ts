@@ -271,7 +271,7 @@ const deleteFromTempS3 = async (courseId: string) => {
 
 			// Delete all objects
 			await s3.deleteObjects(deleteParams).promise();
-			console.log(`Deleted all objects under ${courseId}`);
+			console.log(`Deleted all objects under ${courseId} `);
 		} else {
 			console.log(`No objects found under ${courseId}`);
 		}
