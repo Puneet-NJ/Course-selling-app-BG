@@ -32,14 +32,7 @@ jobs:
           cache-from: type=registry,ref=puneetnj/course-app-be:latest
           cache-to: type=inline,mode=max
           build-args: |
-            DATABASE_URL=${{ secrets.DATABASE_URL }}
-            USER_JWT_PASSWORD=${{ secrets.USER_JWT_PASSWORD }}
-            ADMIN_JWT_PASSWORD=${{ secrets.ADMIN_JWT_PASSWORD }}
-            AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
-            AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
             CDN_LINK=${{ secrets.CDN_LINK }}
-            CF_PUBLIC_KEY=${{ secrets.CF_PUBLIC_KEY }}
-            CF_PRIVATE_KEY=${{ secrets.CF_PRIVATE_KEY }}
 
       - name: Verify Backend Image
         run: |
@@ -63,6 +56,11 @@ jobs:
               sudo docker rm course-app-be
             fi
             sudo docker run -d --name course-app-be -p 4000:4000 \
+              -e DATABASE_URL="${{ secrets.DATABASE_URL }}" \
+              -e USER_JWT_PASSWORD="${{ secrets.USER_JWT_PASSWORD }}" \
+              -e ADMIN_JWT_PASSWORD="${{ secrets.ADMIN_JWT_PASSWORD }}" \
+              -e AWS_ACCESS_KEY_ID="${{ secrets.AWS_ACCESS_KEY_ID }}" \
+              -e AWS_SECRET_ACCESS_KEY="${{ secrets.AWS_SECRET_ACCESS_KEY }}" \
               -e CF_PUBLIC_KEY="$CF_PUBLIC" \
               -e CF_PRIVATE_KEY="$CF_PRIVATE" \
               puneetnj/course-app-be:latest
@@ -73,11 +71,11 @@ jobs:
           node-version: "18"
 
       - name: Install Frontend Dependencies
-        working-directory: ./frontend # Adjust this path based on your project structure
+        working-directory: ./frontend
         run: npm install
 
       - name: Build Frontend
-        working-directory: ./frontend # Adjust this path based on your project structure
+        working-directory: ./frontend
         run: npm run build
 
       - name: Configure AWS Credentials
