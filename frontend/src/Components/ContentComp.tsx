@@ -33,8 +33,6 @@ export const ContentComp = () => {
 
 				// Error handling for HLS
 				hls.on(Hls.Events.ERROR, (event, data) => {
-					console.log(event);
-
 					if (data.fatal) {
 						console.error("Fatal HLS error:", data);
 						switch (data.type) {
