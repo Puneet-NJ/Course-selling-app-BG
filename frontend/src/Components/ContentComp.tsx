@@ -32,7 +32,7 @@ export const ContentComp = () => {
 				hlsRef.current = hls;
 
 				// Error handling for HLS
-				hls.on(Hls.Events.ERROR, (event, data) => {
+				hls.on(Hls.Events.ERROR, (_, data) => {
 					if (data.fatal) {
 						console.error("Fatal HLS error:", data);
 						switch (data.type) {
