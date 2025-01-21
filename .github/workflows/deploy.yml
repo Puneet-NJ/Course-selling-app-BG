@@ -73,26 +73,26 @@ jobs:
       - name: Create SSH key file
         run: |
           mkdir -p ~/.ssh/
-          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/deploy_key
+          echo "${{ secrets.T2_SMALL_SSH_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
 
       - name: Copy worker files to EC2
         run: |
-          scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -r ./worker/* ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:/home/${{ secrets.SSH_USERNAME }}/worker/
+          scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -r ./worker/* ${{ secrets.T2_SMALL_SSH_USERNAME }}@${{ secrets.T2_SMALL_SSH_HOST }}:/home/${{ secrets.T2_SMALL_SSH_USERNAME }}/worker/
 
       - name: Deploy Worker to EC2
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_KEY }}
+          host: ${{ secrets.T2_SMALL_SSH_HOST }}
+          username: ${{ secrets.T2_SMALL_SSH_USERNAME }}
+          key: ${{ secrets.T2_SMALL_SSH_KEY }}
           script: |
             # Install PM2 if not already installed
             if ! command -v pm2 &> /dev/null; then
               npm install -g pm2
             fi
 
-            cd /home/${{ secrets.SSH_USERNAME }}/worker
+            cd /home/${{ secrets.T2_SMALL_SSH_USERNAME }}/worker
 
             # Set environment variables
             cat > .env << EOL
