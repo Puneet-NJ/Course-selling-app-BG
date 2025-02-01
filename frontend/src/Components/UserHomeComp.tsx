@@ -31,7 +31,7 @@ const UserHomeComp = () => {
 	return (
 		<div className="flex flex-col gap-12">
 			<div>
-				<div>
+				<div className="flex justify-center">
 					<img
 						src={imageArray.current[currImage]}
 						className="rounded-lg"
@@ -58,22 +58,22 @@ const UserHomeComp = () => {
 				<h3 className="h3 text-2xl sm:text-3xl font-semibold text-center">
 					Featured
 				</h3>
-				{courses.length === 0 ? (
+				{courses?.length === 0 ? (
 					<div className="text-sm font-bold">No courses available</div>
 				) : !isMobile ? (
 					<CourseCardDisplay courses={courses} />
 				) : (
 					<CourseCard
-						imageUrl={courses[currCourse].imageUrl}
-						title={courses[currCourse].name}
-						price={courses[currCourse].price}
+						imageUrl={courses?.[currCourse].imageUrl}
+						title={courses?.[currCourse].name}
+						price={courses?.[currCourse].price}
 						buttonText="View details"
-						to={`/course/${courses[currCourse].id}`}
+						to={`/course/${courses?.[currCourse].id}`}
 					/>
 				)}
 			</div>
 
-			<div>
+			<div className="mx-auto">
 				<img src={WHY_100XDEVS_URL} />
 			</div>
 

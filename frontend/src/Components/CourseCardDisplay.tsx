@@ -12,7 +12,7 @@ export const CourseCardDisplay = ({
 }) => {
 	return (
 		<div className="flex justify-center flex-wrap gap-10 mx-auto">
-			{courses.map((course) => (
+			{courses?.map((course) => (
 				<CourseCard
 					key={course.id}
 					imageUrl={course.imageUrl}

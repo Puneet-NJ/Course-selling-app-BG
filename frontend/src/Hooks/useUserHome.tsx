@@ -14,7 +14,7 @@ const useUserHome = () => {
 	const courses = useRecoilValue(coursesAtom);
 
 	const topCourses = useMemo(() => {
-		return courses.slice(0, 3);
+		return courses?.slice(0, 3);
 	}, [courses]);
 
 	const isMobile = useMemo(() => {
@@ -23,14 +23,14 @@ const useUserHome = () => {
 	}, [screenSize]);
 
 	useEffect(() => {
-		if (isLoading || error || topCourses.length === 0) {
+		if (isLoading || error || topCourses?.length === 0) {
 			console.log(
 				"Skipping interval setup - loading:",
 				isLoading,
 				"error:",
 				error,
 				"courses:",
-				topCourses.length
+				topCourses?.length
 			);
 			return;
 		}
@@ -43,10 +43,10 @@ const useUserHome = () => {
 
 		let courseIntervalId: NodeJS.Timeout | undefined;
 
-		if (isMobile && topCourses.length > 1) {
+		if (isMobile && topCourses?.length > 1) {
 			courseIntervalId = setInterval(() => {
 				setCurrCourse((prev) =>
-					prev === topCourses.length - 1 ? 0 : prev + 1
+					prev === topCourses?.length - 1 ? 0 : prev + 1
 				);
 			}, 2000);
 		}
@@ -65,7 +65,7 @@ const useUserHome = () => {
 			}
 			window.removeEventListener("resize", handleResize);
 		};
-	}, [isMobile, topCourses.length, isLoading, error]);
+	}, [isMobile, topCourses?.length, isLoading, error]);
 
 	return {
 		imageArray,

@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from "react-router-dom";
-import useFetchCourse from "../Hooks/useFetchCourse";
+import useFetchCourse from "./useFetchCourse";
 import { useRecoilValue } from "recoil";
 import { courseAtom, userTokenPresentAtom } from "../utils/atoms";
 import { useMutation } from "@tanstack/react-query";
