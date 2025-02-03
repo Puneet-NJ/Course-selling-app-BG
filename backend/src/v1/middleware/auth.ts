@@ -2,7 +2,6 @@ import { NextFunction, Request, Response } from "express";
 import jwt, { JwtPayload } from "jsonwebtoken";
 
 type Roles = "Admin" | "User";
-
 type Custom_JWT = JwtPayload & {
 	id: string;
 	name: string;
