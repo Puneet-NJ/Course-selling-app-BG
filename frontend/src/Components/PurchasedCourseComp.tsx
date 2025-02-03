@@ -14,8 +14,6 @@ export function PurchasedCourseComp() {
 	usePurchasedCourse();
 	const course = useRecoilValue(purchasedCourseAtom);
 
-	console.log(course);
-
 	return (
 		<div className="space-y-8">
 			<div className="border-b">
